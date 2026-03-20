@@ -1,4 +1,4 @@
-const API_URL_JUEGOS = '/api/juegos';
+ const API_URL_JUEGOS = '/api/juegos';
 const API_URL_DETALLES = '/api/juegos/detalles';
 const API_URL_AUTH = '/api';
 
@@ -12,7 +12,7 @@ const linkCambiarModo = document.getElementById('link-cambiar-modo');
 const panelUsuario = document.getElementById('panel-usuario');
 const modalIA = document.getElementById('modal-ia');
 const btnCerrarModalIA = document.getElementById('cerrar-modal-ia');
-const contenedorRecomendaciones = document.getElementById('contenedor-recomendaciones');
+const contenedorRecomendaciones = document.getElementById('contenedor-recommendaciones');
 const mensajeIA = document.getElementById('mensaje-ia');
 const modalDetalles = document.getElementById('modal-detalles');
 const btnCerrarModalDetalles = document.getElementById('cerrar-modal-detalles');
@@ -23,6 +23,7 @@ const contenedorFavoritos = document.getElementById('contenedor-favoritos');
 
 let esModoRegistro = false;
 let urlSiguientePagina = null;
+let logrosCargadosActuales = 0; // Nueva variable para el contador
 
 function crearTarjetaJuego(juego, contenedorDestino) {
     if (!juego) return;
@@ -48,12 +49,16 @@ async function abrirDetalles(id) {
         const res = await fetch(`${API_URL_DETALLES}/${id}`);
         const data = await res.json();
         urlSiguientePagina = data.siguientePagina;
+        logrosCargadosActuales = data.trofeos.length; // Inicializamos contador
 
         let vidHtml = data.trailers[0] ? `<video controls width="100%" class="video-trailer" src="${data.trailers[0].data.max}"></video>` : '<p class="aviso-vacio">🎥 Sin trailers.</p>';
 
         let logrosHtml = '';
         if (data.trofeos.length > 0) {
             logrosHtml = `
+                <div class="contador-logros-contenedor">
+                    🏆 <span id="contador-texto">Has descubierto ${logrosCargadosActuales} logros</span>
+                </div>
                 <div id="contenedor-logros-lista" class="grid-logros">
                     ${data.trofeos.map(t => `<div class="tarjeta-logro"><img src="${t.image || 'https://via.placeholder.com/50'}"><div><h4>${t.name}</h4><p>${t.description || ''}</p></div></div>`).join('')}
                 </div>
@@ -73,18 +78,32 @@ async function abrirDetalles(id) {
 
 async function cargarMasLogros() {
     const btn = document.getElementById('btn-ver-mas-logros');
+    const textoContador = document.getElementById('contador-texto');
     btn.innerText = "⏳ Cargando...";
+    
     try {
         const res = await fetch(`/api/juegos/logros-mas?url=${encodeURIComponent(urlSiguientePagina)}`);
         const data = await res.json();
+        
         urlSiguientePagina = data.siguientePagina;
+        logrosCargadosActuales += data.trofeos.length; // Sumamos al contador
+        
         const lista = document.getElementById('contenedor-logros-lista');
         data.trofeos.forEach(t => {
             const div = document.createElement('div'); div.className = 'tarjeta-logro';
             div.innerHTML = `<img src="${t.image || 'https://via.placeholder.com/50'}"><div><h4>${t.name}</h4><p>${t.description || ''}</p></div>`;
             lista.appendChild(div);
         });
-        if (!urlSiguientePagina) btn.remove(); else btn.innerText = "📥 Cargar más logros...";
+
+        // Actualizamos el texto del contador
+        textoContador.innerText = `Has descubierto ${logrosCargadosActuales} logros`;
+
+        if (!urlSiguientePagina) {
+            btn.remove();
+            textoContador.innerText = `✅ ¡Cacería completa! Encontraste los ${logrosCargadosActuales} logros.`;
+        } else {
+            btn.innerText = "📥 Cargar más logros...";
+        }
     } catch (e) { alert("Error al cargar."); }
 }
 
