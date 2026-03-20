@@ -358,3 +358,34 @@ h1 {
 #btn-abrir-favoritos:hover {
     background-color: #e59400;
 }
+.contador-logros {
+    background: #ffb703;
+    color: #151515;
+    padding: 5px 15px;
+    border-radius: 20px;
+    display: inline-block;
+    font-weight: bold;
+    margin-bottom: 15px;
+    font-size: 0.9em;
+}
+
+.aviso-coleccion {
+    background: rgba(255, 183, 3, 0.1);
+    border: 1px dashed #ffb703;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    color: #ccc;
+}
+
+.aviso-coleccion h3 {
+    color: #ffb703;
+    margin-bottom: 10px;
+}
+
+.aviso-vacio {
+    color: #888;
+    font-style: italic;
+    text-align: center;
+    padding: 10px;
+}
