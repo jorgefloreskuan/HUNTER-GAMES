@@ -439,3 +439,35 @@ h1 {
     transform: translateX(10px);
     background: rgba(255, 255, 255, 0.05);
 }
+/* Contenedor de la barra */
+.progreso-contenedor {
+    background: #222;
+    border-radius: 20px;
+    height: 25px;
+    width: 100%;
+    margin: 15px 0;
+    overflow: hidden;
+    border: 1px solid #444;
+    position: relative;
+}
+
+/* La barra que se mueve */
+.progreso-barra {
+    background: linear-gradient(90deg, #2ecc71, #27ae60);
+    height: 100%;
+    width: 0%; /* Empieza en 0 */
+    transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+}
+
+/* Texto del porcentaje */
+.progreso-texto {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    line-height: 25px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+}

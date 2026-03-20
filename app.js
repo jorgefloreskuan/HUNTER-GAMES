@@ -24,13 +24,35 @@ const contenedorFavoritos = document.getElementById('contenedor-favoritos');
 let esModoRegistro = false;
 let urlSiguientePagina = null;
 let logrosCargadosActuales = 0;
-let listaCompletados = []; // Aquí guardaremos lo que viene de la DB
+let listaCompletados = [];
+
+// --- FUNCIÓN PARA CALCULAR EL PROGRESO ---
+function actualizarBarra() {
+    const todosLosLogrosEnDOM = document.querySelectorAll('.tarjeta-logro');
+    const completadosEnDOM = document.querySelectorAll('.tarjeta-logro.completado');
+    
+    const total = todosLosLogrosEnDOM.length;
+    const realizados = completadosEnDOM.length;
+    
+    if (total === 0) return;
+
+    const porcentaje = Math.round((realizados / total) * 100);
+    const barra = document.getElementById('barra-llenado');
+    const texto = document.getElementById('porcentaje-numero');
+
+    if (barra && texto) {
+        barra.style.width = porcentaje + '%';
+        texto.innerText = `${porcentaje}% COMPLETADO (${realizados}/${total})`;
+    }
+}
 
 async function cargarListaCompletados() {
     const token = localStorage.getItem('token');
     if (!token) return;
-    const res = await fetch(`${API_URL_AUTH}/logros/completados`, { headers: { 'Authorization': `Bearer ${token}` } });
-    listaCompletados = await res.json();
+    try {
+        const res = await fetch(`${API_URL_AUTH}/logros/completados`, { headers: { 'Authorization': `Bearer ${token}` } });
+        listaCompletados = await res.json();
+    } catch (e) { console.error(e); }
 }
 
 function crearTarjetaJuego(juego, contenedorDestino) {
@@ -52,22 +74,22 @@ function crearTarjetaJuego(juego, contenedorDestino) {
 
 async function abrirDetalles(id) {
     modalDetalles.classList.remove('oculto');
-    contenidoDetalles.innerHTML = '<div class="cargando">Cargando...</div>';
+    contenidoDetalles.innerHTML = '<div class="cargando">Abriendo base de datos...</div>';
     await cargarListaCompletados();
     
     try {
         const res = await fetch(`${API_URL_DETALLES}/${id}`);
         const data = await res.json();
         urlSiguientePagina = data.siguientePagina;
-        logrosCargadosActuales = data.trofeos.length;
 
         let vidHtml = data.trailers[0] ? `<video controls width="100%" class="video-trailer" src="${data.trailers[0].data.max}"></video>` : '<p class="aviso-vacio">🎥 Sin trailers.</p>';
 
         let logrosHtml = '';
         if (data.trofeos.length > 0) {
             logrosHtml = `
-                <div class="contador-logros-contenedor">
-                    🏆 <span id="contador-texto">Cargados: ${logrosCargadosActuales}</span>
+                <div class="progreso-contenedor">
+                    <div class="progreso-texto" id="porcentaje-numero">0% COMPLETADO</div>
+                    <div class="progreso-barra" id="barra-llenado"></div>
                 </div>
                 <div id="contenedor-logros-lista" class="grid-logros">
                     ${data.trofeos.map(t => {
@@ -88,14 +110,17 @@ async function abrirDetalles(id) {
             <div class="cabecera-juego"><img src="${data.info.background_image}" class="img-principal">
             <div class="info-texto"><h2>${data.info.name}</h2><div class="descripcion-scroll">${data.info.description}</div></div></div>
             <hr class="separador"><h3>🎥 Gameplay</h3>${vidHtml}
-            <hr class="separador"><h3>📸 Galería</h3><div class="galeria-capturas">${data.capturas.map(c => `<img src="${c.image}" class="img-galeria">`).join('')}</div>
-            <hr class="separador"><h3>🏆 Checklist de Logros</h3>${logrosHtml}`;
+            <hr class="separador"><h3>🏆 Checklist de Cacería</h3>${logrosHtml}`;
+        
+        // Calculamos la barra apenas abra
+        setTimeout(actualizarBarra, 100);
+
     } catch (e) { console.error(e); }
 }
 
 async function marcarLogro(idLogro) {
     const token = localStorage.getItem('token');
-    if (!token) return alert("Inicia sesión para marcar logros.");
+    if (!token) return alert("Inicia sesión para guardar tu progreso.");
 
     const res = await fetch(`${API_URL_AUTH}/logros/completar`, {
         method: 'POST',
@@ -104,8 +129,11 @@ async function marcarLogro(idLogro) {
     });
     const data = await res.json();
     const elemento = document.getElementById(`logro-${idLogro}`);
+    
     if (data.completado) elemento.classList.add('completado');
     else elemento.classList.remove('completado');
+
+    actualizarBarra(); // ¡Actualiza la barra al hacer clic!
 }
 
 async function cargarMasLogros() {
@@ -114,8 +142,6 @@ async function cargarMasLogros() {
     const res = await fetch(`/api/juegos/logros-mas?url=${encodeURIComponent(urlSiguientePagina)}`);
     const data = await res.json();
     urlSiguientePagina = data.siguientePagina;
-    logrosCargadosActuales += data.trofeos.length;
-    document.getElementById('contador-texto').innerText = `Cargados: ${logrosCargadosActuales}`;
     
     const lista = document.getElementById('contenedor-logros-lista');
     data.trofeos.forEach(t => {
@@ -127,7 +153,10 @@ async function cargarMasLogros() {
         div.innerHTML = `<img src="${t.image || 'https://via.placeholder.com/50'}"><div><h4>${t.name}</h4><p>${t.description || ''}</p></div>`;
         lista.appendChild(div);
     });
+
     if (!urlSiguientePagina) btn.remove(); else btn.innerText = "📥 Cargar más...";
+    
+    actualizarBarra(); // Recalcula al cargar nuevos logros
 }
 
 async function toggleFavorito(id, n, i) {
