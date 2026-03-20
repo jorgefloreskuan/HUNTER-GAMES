@@ -1,4 +1,4 @@
- const API_URL_JUEGOS = '/api/juegos';
+const API_URL_JUEGOS = '/api/juegos';
 const API_URL_DETALLES = '/api/juegos/detalles';
 const API_URL_AUTH = '/api';
 
@@ -12,7 +12,7 @@ const linkCambiarModo = document.getElementById('link-cambiar-modo');
 const panelUsuario = document.getElementById('panel-usuario');
 const modalIA = document.getElementById('modal-ia');
 const btnCerrarModalIA = document.getElementById('cerrar-modal-ia');
-const contenedorRecomendaciones = document.getElementById('contenedor-recommendaciones');
+const contenedorRecomendaciones = document.getElementById('contenedor-recomendaciones');
 const mensajeIA = document.getElementById('mensaje-ia');
 const modalDetalles = document.getElementById('modal-detalles');
 const btnCerrarModalDetalles = document.getElementById('cerrar-modal-detalles');
@@ -26,76 +26,67 @@ let urlSiguientePagina = null;
 let logrosCargadosActuales = 0;
 let listaCompletados = [];
 
-// --- FUNCIÓN PARA CALCULAR EL PROGRESO ---
+// --- LÓGICA DE PROGRESO ---
 function actualizarBarra() {
-    const todosLosLogrosEnDOM = document.querySelectorAll('.tarjeta-logro');
-    const completadosEnDOM = document.querySelectorAll('.tarjeta-logro.completado');
-    
-    const total = todosLosLogrosEnDOM.length;
-    const realizados = completadosEnDOM.length;
-    
-    if (total === 0) return;
-
-    const porcentaje = Math.round((realizados / total) * 100);
+    const todos = document.querySelectorAll('.tarjeta-logro');
+    const hechos = document.querySelectorAll('.tarjeta-logro.completado');
+    if (todos.length === 0) return;
+    const porc = Math.round((hechos.length / todos.length) * 100);
     const barra = document.getElementById('barra-llenado');
     const texto = document.getElementById('porcentaje-numero');
-
     if (barra && texto) {
-        barra.style.width = porcentaje + '%';
-        texto.innerText = `${porcentaje}% COMPLETADO (${realizados}/${total})`;
+        barra.style.width = porc + '%';
+        texto.innerText = `${porc}% COMPLETADO (${hechos.length}/${todos.length})`;
     }
 }
 
 async function cargarListaCompletados() {
     const token = localStorage.getItem('token');
     if (!token) return;
-    try {
-        const res = await fetch(`${API_URL_AUTH}/logros/completados`, { headers: { 'Authorization': `Bearer ${token}` } });
-        listaCompletados = await res.json();
-    } catch (e) { console.error(e); }
+    const res = await fetch(`${API_URL_AUTH}/logros/completados`, { headers: { 'Authorization': `Bearer ${token}` } });
+    listaCompletados = await res.json();
 }
 
-function crearTarjetaJuego(juego, contenedorDestino) {
+function crearTarjetaJuego(juego, destino) {
     if (!juego) return;
-    const tarjeta = document.createElement('div');
-    tarjeta.className = 'tarjeta-juego';
-    const nombreLimpio = juego.name.replace(/'/g, "\\'"); 
-    const imagenLimpia = juego.background_image || 'https://via.placeholder.com/400x225?text=Sin+Imagen';
-    tarjeta.innerHTML = `
-        <img src="${imagenLimpia}" onclick="abrirDetalles('${juego.id}')">
+    const d = document.createElement('div');
+    d.className = 'tarjeta-juego';
+    const n = juego.name.replace(/'/g, "\\'");
+    const img = juego.background_image || 'https://via.placeholder.com/400x225?text=Sin+Imagen';
+    d.innerHTML = `
+        <img src="${img}" onclick="abrirDetalles('${juego.id}')">
         <div class="info-juego">
             <h3>${juego.name}</h3>
             <button class="btn-detalles" onclick="abrirDetalles('${juego.id}')">🔍 Ficha</button>
-            <button class="btn-ia" onclick="pedirRecomendacionIA('${nombreLimpio}')">🌟 IA</button>
-            <button class="btn-favorito" onclick="toggleFavorito('${juego.id}', '${nombreLimpio}', '${imagenLimpia}')">⭐ Favorito</button>
+            <button class="btn-ia" onclick="pedirRecomendacionIA('${n}')">🌟 IA</button>
+            <button class="btn-favorito" onclick="toggleFavorito('${juego.id}', '${n}', '${img}')">⭐ Favorito</button>
         </div>`;
-    contenedorDestino.appendChild(tarjeta);
+    destino.appendChild(d);
 }
 
 async function abrirDetalles(id) {
     modalDetalles.classList.remove('oculto');
-    contenidoDetalles.innerHTML = '<div class="cargando">Abriendo base de datos...</div>';
+    contenidoDetalles.innerHTML = '<div class="cargando">🛰️ Rastreando datos...</div>';
     await cargarListaCompletados();
-    
     try {
         const res = await fetch(`${API_URL_DETALLES}/${id}`);
         const data = await res.json();
         urlSiguientePagina = data.siguientePagina;
+        logrosCargadosActuales = data.trofeos.length;
 
-        let vidHtml = data.trailers[0] ? `<video controls width="100%" class="video-trailer" src="${data.trailers[0].data.max}"></video>` : '<p class="aviso-vacio">🎥 Sin trailers.</p>';
-
+        let vid = data.trailers[0] ? `<video controls width="100%" class="video-trailer" src="${data.trailers[0].data.max}"></video>` : '<p class="aviso-vacio">🎥 Sin trailers.</p>';
         let logrosHtml = '';
+
         if (data.trofeos.length > 0) {
             logrosHtml = `
                 <div class="progreso-contenedor">
-                    <div class="progreso-texto" id="porcentaje-numero">0% COMPLETADO</div>
+                    <div class="progreso-texto" id="porcentaje-numero">0%</div>
                     <div class="progreso-barra" id="barra-llenado"></div>
                 </div>
                 <div id="contenedor-logros-lista" class="grid-logros">
                     ${data.trofeos.map(t => {
-                        const estaCompletado = listaCompletados.includes(t.id.toString());
-                        return `
-                        <div class="tarjeta-logro ${estaCompletado ? 'completado' : ''}" id="logro-${t.id}" onclick="marcarLogro('${t.id}')">
+                        const ok = listaCompletados.includes(t.id.toString());
+                        return `<div class="tarjeta-logro ${ok ? 'completado' : ''}" id="logro-${t.id}" onclick="marcarLogro('${t.id}')">
                             <img src="${t.image || 'https://via.placeholder.com/50'}">
                             <div><h4>${t.name}</h4><p>${t.description || ''}</p></div>
                         </div>`;
@@ -103,37 +94,29 @@ async function abrirDetalles(id) {
                 </div>
                 ${urlSiguientePagina ? '<button id="btn-ver-mas-logros" class="btn-ia" style="width:100%;" onclick="cargarMasLogros()">📥 Cargar más...</button>' : ''}`;
         } else {
-            logrosHtml = '<div class="aviso-coleccion"><h3>⚠️ Sin logros</h3><p>Prueba con la colección principal.</p></div>';
+            logrosHtml = '<div class="aviso-coleccion"><h3>⚠️ Sin logros</h3><p>Busca la colección principal.</p></div>';
         }
 
         contenidoDetalles.innerHTML = `
             <div class="cabecera-juego"><img src="${data.info.background_image}" class="img-principal">
             <div class="info-texto"><h2>${data.info.name}</h2><div class="descripcion-scroll">${data.info.description}</div></div></div>
-            <hr class="separador"><h3>🎥 Gameplay</h3>${vidHtml}
-            <hr class="separador"><h3>🏆 Checklist de Cacería</h3>${logrosHtml}`;
-        
-        // Calculamos la barra apenas abra
+            <hr class="separador"><h3>🎥 Gameplay</h3>${vid}
+            <hr class="separador"><h3>📸 Galería</h3><div class="galeria-capturas">${data.capturas.map(c => `<img src="${c.image}" class="img-galeria">`).join('')}</div>
+            <hr class="separador"><h3>🏆 Checklist</h3>${logrosHtml}`;
         setTimeout(actualizarBarra, 100);
-
     } catch (e) { console.error(e); }
 }
 
-async function marcarLogro(idLogro) {
+async function marcarLogro(id) {
     const token = localStorage.getItem('token');
-    if (!token) return alert("Inicia sesión para guardar tu progreso.");
-
+    if (!token) return alert("Inicia sesión.");
     const res = await fetch(`${API_URL_AUTH}/logros/completar`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ idLogro })
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ idLogro: id })
     });
     const data = await res.json();
-    const elemento = document.getElementById(`logro-${idLogro}`);
-    
-    if (data.completado) elemento.classList.add('completado');
-    else elemento.classList.remove('completado');
-
-    actualizarBarra(); // ¡Actualiza la barra al hacer clic!
+    document.getElementById(`logro-${id}`).classList.toggle('completado', data.completado);
+    actualizarBarra();
 }
 
 async function cargarMasLogros() {
@@ -142,46 +125,49 @@ async function cargarMasLogros() {
     const res = await fetch(`/api/juegos/logros-mas?url=${encodeURIComponent(urlSiguientePagina)}`);
     const data = await res.json();
     urlSiguientePagina = data.siguientePagina;
-    
     const lista = document.getElementById('contenedor-logros-lista');
     data.trofeos.forEach(t => {
-        const estaCompletado = listaCompletados.includes(t.id.toString());
+        const ok = listaCompletados.includes(t.id.toString());
         const div = document.createElement('div');
-        div.className = `tarjeta-logro ${estaCompletado ? 'completado' : ''}`;
+        div.className = `tarjeta-logro ${ok ? 'completado' : ''}`;
         div.id = `logro-${t.id}`;
         div.onclick = () => marcarLogro(t.id);
         div.innerHTML = `<img src="${t.image || 'https://via.placeholder.com/50'}"><div><h4>${t.name}</h4><p>${t.description || ''}</p></div>`;
         lista.appendChild(div);
     });
-
     if (!urlSiguientePagina) btn.remove(); else btn.innerText = "📥 Cargar más...";
-    
-    actualizarBarra(); // Recalcula al cargar nuevos logros
+    actualizarBarra();
 }
 
-async function toggleFavorito(id, n, i) {
-    const token = localStorage.getItem('token');
-    if (!token) return modalAuth.classList.remove('oculto');
-    const res = await fetch(`${API_URL_AUTH}/favoritos`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ idJuego: id, nombre: n, imagen: i }) });
-    const data = await res.json(); alert(data.mensaje);
-}
-
-async function abrirFavoritos() {
-    modalFavoritos.classList.remove('oculto'); contenedorFavoritos.innerHTML = '...';
-    const res = await fetch(`${API_URL_AUTH}/favoritos`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
-    const favs = await res.json(); contenedorFavoritos.innerHTML = '';
-    favs.forEach(f => {
-        const d = document.createElement('div'); d.className = 'tarjeta-juego';
-        d.innerHTML = `<img src="${f.imagen}" onclick="abrirDetalles('${f.idJuego}')"><h3>${f.nombre}</h3><button onclick="toggleFavorito('${f.idJuego}', '${f.nombre}', '${f.imagen}'); abrirFavoritos();">❌</button>`;
-        contenedorFavoritos.appendChild(d);
-    });
-}
-
+// --- INTELIGENCIA ARTIFICIAL ANIMADA ---
 async function pedirRecomendacionIA(n) {
-    modalIA.classList.remove('oculto'); mensajeIA.classList.remove('oculto'); contenedorRecomendaciones.innerHTML = '';
-    const res = await fetch(`${API_URL_AUTH}/recomendaciones/${encodeURIComponent(n)}`);
-    const sims = await res.json(); mensajeIA.classList.add('oculto');
-    sims.forEach(j => crearTarjetaJuego(j, contenedorRecomendaciones));
+    modalIA.classList.remove('oculto');
+    contenedorRecomendaciones.innerHTML = '';
+    mensajeIA.classList.remove('oculto');
+    mensajeIA.innerHTML = `
+        <div class="rastreo-ia-contenedor">
+            <div class="rastreo-ia-icono">🛰️</div>
+            <h3>Rastreador Géminis Activado</h3>
+            <p>Escaneando el ADN de <span class="destacado">${n}</span>...</p>
+            <div class="rastreo-ia-barra"><div class="rastreo-ia-llenado"></div></div>
+            <p class="aviso-ia">Gemini está "pensando". Podría tardar unos segundos.</p>
+        </div>`;
+    try {
+        const res = await fetch(`${API_URL_AUTH}/recomendaciones/${encodeURIComponent(n)}`);
+        const sims = await res.json();
+        mensajeIA.classList.add('oculto');
+        sims.forEach(j => crearTarjetaJuego(j, contenedorRecomendaciones));
+    } catch (e) {
+        mensajeIA.innerHTML = "🛑 Error de conexión con la IA.";
+    }
+}
+
+// --- SISTEMA BASE ---
+async function toggleFavorito(id, n, img) {
+    const t = localStorage.getItem('token');
+    if (!t) return modalAuth.classList.remove('oculto');
+    const res = await fetch(`${API_URL_AUTH}/favoritos`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` }, body: JSON.stringify({ idJuego: id, nombre: n, imagen: img }) });
+    const data = await res.json(); alert(data.mensaje);
 }
 
 function verificarSesion() {
@@ -190,6 +176,14 @@ function verificarSesion() {
         panelUsuario.innerHTML = `<button id="btn-f" class="btn-auth">⭐ Favs</button><span class="user-badge">👤 ${u}</span><button onclick="localStorage.clear(); location.reload();" class="btn-auth">Salir</button>`;
         document.getElementById('btn-f').onclick = abrirFavoritos;
     }
+}
+
+async function abrirFavoritos() {
+    modalFavoritos.classList.remove('oculto');
+    const res = await fetch(`${API_URL_AUTH}/favoritos`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+    const f = await res.json();
+    contenedorFavoritos.innerHTML = '';
+    f.forEach(fav => crearTarjetaJuego(fav, contenedorFavoritos));
 }
 
 formAuth.onsubmit = async (e) => {
@@ -215,4 +209,4 @@ btnCerrarModalFavoritos.onclick = () => modalFavoritos.classList.add('oculto');
 btnBuscar.onclick = () => obtenerJuegos(inputBusqueda.value);
 inputBusqueda.onkeypress = (e) => { if (e.key === 'Enter') obtenerJuegos(inputBusqueda.value); };
 
-verificarSesion(); obtenerJuegos();
+verificarSesion(); obtenerJuegos(); 

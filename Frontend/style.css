@@ -471,3 +471,41 @@ h1 {
     color: white;
     text-shadow: 1px 1px 2px black;
 }
+/* BARRA DE PROGRESO DE LOGROS */
+.progreso-contenedor {
+    background: #222; border-radius: 20px; height: 25px; width: 100%;
+    margin: 15px 0; overflow: hidden; border: 1px solid #444; position: relative;
+}
+.progreso-barra {
+    background: linear-gradient(90deg, #2ecc71, #27ae60);
+    height: 100%; width: 0%; transition: width 0.5s ease-out;
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+}
+.progreso-texto {
+    position: absolute; width: 100%; text-align: center; line-height: 25px;
+    font-size: 0.85rem; font-weight: bold; color: white; text-shadow: 1px 1px 2px black;
+}
+
+/* TARJETAS DE LOGRO COMPLETADAS */
+.tarjeta-logro.completado {
+    background: rgba(46, 204, 113, 0.15);
+    border: 1px solid #2ecc71;
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.2);
+}
+.tarjeta-logro.completado h4 { color: #2ecc71; }
+
+/* RASTREADOR IA ANIMADO */
+.rastreo-ia-contenedor {
+    text-align: center; padding: 20px; background: rgba(0,0,0,0.5);
+    border-radius: 15px; border: 1px solid #ffb700;
+}
+.rastreo-ia-icono { font-size: 3rem; animation: flotar 2s infinite; }
+.rastreo-ia-barra { background: #222; border-radius: 10px; height: 10px; width: 80%; margin: 15px auto; overflow: hidden; }
+.rastreo-ia-llenado {
+    background: #ffb700; height: 100%; width: 0%;
+    animation: cargarInfinito 4s infinite; box-shadow: 0 0 10px #ffb700;
+}
+
+@keyframes flotar { 50% { transform: translateY(-10px); } }
+@keyframes cargarInfinito { 0% { width: 0%; } 50% { width: 95%; } 100% { width: 0%; } }
+.destacado { color: #ffb700; font-weight: bold; }
