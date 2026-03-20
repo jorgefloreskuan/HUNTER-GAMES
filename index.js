@@ -1,4 +1,4 @@
-const express = require('express');
+ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const mongoose = require('mongoose');
@@ -13,11 +13,9 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname)));
 
-// 1. Servir archivos estáticos (CSS, JS, Imágenes)
-app.use(express.static(__dirname));
-
-// 2. CONEXIÓN A MONGODB
+// --- 1. CONEXIÓN A MONGODB ---
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('🟢 Base de datos conectada'))
     .catch(err => console.error('🔴 Error DB:', err));
@@ -92,16 +90,40 @@ app.get('/api/juegos', async (req, res) => {
     res.json(r.data.results);
 });
 
+// --- RUTA DE DETALLES CON BARRIDO TOTAL DE LOGROS ---
 app.get('/api/juegos/detalles/:id', async (req, res) => {
-    const id = req.params.id;
-    const key = process.env.RAWG_API_KEY;
-    const [det, img, log, vid] = await Promise.all([
-        axios.get(`https://api.rawg.io/api/games/${id}?key=${key}`),
-        axios.get(`https://api.rawg.io/api/games/${id}/screenshots?key=${key}`),
-        axios.get(`https://api.rawg.io/api/games/${id}/achievements?key=${key}&page_size=100`),
-        axios.get(`https://api.rawg.io/api/games/${id}/movies?key=${key}`)
-    ]);
-    res.json({ info: det.data, capturas: img.data.results.slice(0,6), trofeos: log.data.results, trailers: vid.data.results });
+    try {
+        const id = req.params.id;
+        const key = process.env.RAWG_API_KEY;
+
+        // 1. Pedimos Info básica, Imágenes y Videos en paralelo
+        const [det, img, vid] = await Promise.all([
+            axios.get(`https://api.rawg.io/api/games/${id}?key=${key}`),
+            axios.get(`https://api.rawg.io/api/games/${id}/screenshots?key=${key}`),
+            axios.get(`https://api.rawg.io/api/games/${id}/movies?key=${key}`)
+        ]);
+
+        // 2. Lógica de Paginación (Barrido)
+        let todosLosLogros = [];
+        let urlLogros = `https://api.rawg.io/api/games/${id}/achievements?key=${key}&page_size=40`;
+
+        // Mientras la API nos diga que hay una página "siguiente", seguimos pidiendo
+        while (urlLogros && todosLosLogros.length < 200) {
+            const resLogros = await axios.get(urlLogros);
+            todosLosLogros = [...todosLosLogros, ...resLogros.data.results];
+            urlLogros = resLogros.data.next; // Aquí RAWG nos da el link a la página 2, 3, etc.
+        }
+
+        res.json({ 
+            info: det.data, 
+            capturas: img.data.results.slice(0, 6), 
+            trofeos: todosLosLogros, 
+            trailers: vid.data.results 
+        });
+    } catch (error) {
+        console.error("Error en detalles:", error);
+        res.status(500).json({ error: 'Error al obtener la ficha completa.' });
+    }
 });
 
 app.get('/api/recomendaciones/:juego', async (req, res) => {
@@ -114,10 +136,9 @@ app.get('/api/recomendaciones/:juego', async (req, res) => {
     res.json(respuestas.map(r => r.data.results[0]).filter(j => j !== undefined));
 });
 
-// --- RUTA PARA EL HOME (SIN ASTERISCOS) ---
+// Ruta para el Home
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.resolve(__dirname, 'index.html'));
 });
 
-// Arrancar servidor
 app.listen(PORT, () => { console.log(`🚀 Puerto ${PORT}`); });
