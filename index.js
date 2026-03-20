@@ -5,18 +5,14 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const path = require('path'); // Herramienta para rutas de archivos
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
-
-// --- SERVIR ARCHIVOS ESTÁTICOS ---
-// Esto le dice a Render que tus archivos CSS y JS están en la carpeta principal
 app.use(express.static(path.join(__dirname)));
 
 // --- 1. CONEXIÓN A MONGODB ---
@@ -24,7 +20,6 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('🟢 ¡Base de datos conectada con éxito!'))
     .catch(err => console.error('🔴 Error conectando a MongoDB:', err));
 
-// Esquema de Usuario
 const usuarioSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
@@ -33,7 +28,6 @@ const usuarioSchema = new mongoose.Schema({
 });
 const Usuario = mongoose.model('Usuario', usuarioSchema);
 
-// Seguridad
 const verificarToken = (req, res, next) => {
     const token = req.header('Authorization');
     if (!token) return res.status(401).json({ error: 'Acceso denegado.' });
@@ -53,7 +47,7 @@ app.post('/api/registro', async (req, res) => {
         const nuevoUsuario = new Usuario({ username, email, password: passwordEncriptada });
         await nuevoUsuario.save();
         res.status(201).json({ mensaje: '¡Cazador registrado!' });
-    } catch (error) { res.status(500).json({ error: 'Error al registrar.' }); }
+    } catch (error) { res.status(500).json({ error: 'Error.' }); }
 });
 
 app.post('/api/login', async (req, res) => {
@@ -63,7 +57,7 @@ app.post('/api/login', async (req, res) => {
         if (!usuario || !await bcrypt.compare(password, usuario.password)) return res.status(400).json({ error: 'Credenciales inválidas.' });
         const token = jwt.sign({ id: usuario._id, username: usuario.username }, process.env.JWT_SECRET, { expiresIn: '2h' });
         res.json({ token, username: usuario.username });
-    } catch (error) { res.status(500).json({ error: 'Error al entrar.' }); }
+    } catch (error) { res.status(500).json({ error: 'Error.' }); }
 });
 
 app.post('/api/favoritos', verificarToken, async (req, res) => {
@@ -74,13 +68,13 @@ app.post('/api/favoritos', verificarToken, async (req, res) => {
         if (index === -1) {
             usuario.favoritos.push({ idJuego: idJuego.toString(), nombre, imagen });
             await usuario.save();
-            res.json({ mensaje: '⭐ Agregado a favoritos.' });
+            res.json({ mensaje: '⭐ Agregado.' });
         } else {
             usuario.favoritos.splice(index, 1);
             await usuario.save();
-            res.json({ mensaje: '❌ Eliminado de favoritos.' });
+            res.json({ mensaje: '❌ Eliminado.' });
         }
-    } catch (error) { res.status(500).json({ error: 'Error en favoritos.' }); }
+    } catch (error) { res.status(500).json({ error: 'Error.' }); }
 });
 
 app.get('/api/favoritos', verificarToken, async (req, res) => {
@@ -118,9 +112,9 @@ app.get('/api/recomendaciones/:juego', async (req, res) => {
     res.json(respuestas.map(r => r.data.results[0]).filter(j => j !== undefined));
 });
 
-// --- RUTA COMODÍN (HOME) ---
-// Esto resuelve el error ENOENT: busca el archivo index.html pase lo que pase
-app.get('*', (req, res) => {
+// --- RUTA COMPATIBLE CON RENDER ---
+// Hemos cambiado '*' por '(.*)' para que no dé error de parámetros
+app.get('(.*)', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
