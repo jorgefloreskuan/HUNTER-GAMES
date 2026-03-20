@@ -1,38 +1,55 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8"><title>HUNTER GAMES</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HUNTER GAMES | Bóveda de Logros</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header><nav>
-        <div class="logo">🏹 HUNTER GAMES</div>
-        <div class="busqueda-container"><input type="text" id="input-busqueda"><button id="btn-buscar">Cazar</button></div>
-        <div id="panel-usuario"></div>
-    </nav></header>
+    <header>
+        <nav>
+            <div class="logo">🏹 HUNTER GAMES</div>
+            <div class="busqueda-container">
+                <input type="text" id="input-busqueda" placeholder="Buscar en la base de datos...">
+                <button id="btn-buscar">Cazar</button>
+            </div>
+            <div id="panel-usuario"></div>
+        </nav>
+    </header>
 
-    <main id="contenedor-juegos"></main>
+    <main id="contenedor-juegos">
+        </main>
 
-    <div id="modal-auth" class="modal oculto"><div class="contenido-modal">
-        <span class="cerrar" onclick="cerrarModales()">&times;</span>
-        <form id="form-auth">
-            <input type="email" id="auth-email" placeholder="Email" required>
-            <input type="password" id="auth-password" placeholder="Pass" required>
-            <button type="submit">Entrar</button>
-        </form>
-    </div></div>
+    <div id="modal-detalles" class="modal oculto">
+        <div class="contenido-modal ancho-grande">
+            <span class="cerrar" onclick="cerrarModales()">&times;</span>
+            <div id="contenido-detalles"></div>
+        </div>
+    </div>
 
-    <div id="modal-detalles" class="modal oculto"><div class="contenido-modal ancho-grande">
-        <span class="cerrar" onclick="cerrarModales()">&times;</span>
-        <div id="contenido-detalles"></div>
-    </div></div>
+    <div id="modal-ia" class="modal oculto">
+        <div class="contenido-modal ancho-grande">
+            <span class="cerrar" onclick="cerrarModales()">&times;</span>
+            <div id="mensaje-ia"></div>
+            <div id="contenedor-recomendaciones" class="grid-juegos"></div>
+        </div>
+    </div>
 
-    <div id="modal-ia" class="modal oculto"><div class="contenido-modal ancho-grande">
-        <span class="cerrar" onclick="cerrarModales()">&times;</span>
-        <div id="mensaje-ia"></div>
-        <div id="contenedor-recomendaciones" class="grid-juegos"></div>
-    </div></div>
+    <div id="modal-auth" class="modal oculto">
+        <div class="contenido-modal">
+            <span class="cerrar" onclick="cerrarModales()">&times;</span>
+            <h2 id="titulo-auth">Acceso al Sistema</h2>
+            <form id="form-auth">
+                <input type="text" id="auth-username" placeholder="Nombre de usuario" class="oculto">
+                <input type="email" id="auth-email" placeholder="Correo electrónico" required>
+                <input type="password" id="auth-password" placeholder="Contraseña" required>
+                <button type="submit" class="btn-ia">Entrar</button>
+            </form>
+            <p id="link-cambiar-modo" style="cursor:pointer; margin-top:15px; font-size:0.8rem; text-align:center; color:var(--primary);">¿Nuevo cazador? Regístrate aquí</p>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>
-</html>
+</html> 
