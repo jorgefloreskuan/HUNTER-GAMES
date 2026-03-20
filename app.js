@@ -23,7 +23,15 @@ const contenedorFavoritos = document.getElementById('contenedor-favoritos');
 
 let esModoRegistro = false;
 let urlSiguientePagina = null;
-let logrosCargadosActuales = 0; // Nueva variable para el contador
+let logrosCargadosActuales = 0;
+let listaCompletados = []; // Aquí guardaremos lo que viene de la DB
+
+async function cargarListaCompletados() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const res = await fetch(`${API_URL_AUTH}/logros/completados`, { headers: { 'Authorization': `Bearer ${token}` } });
+    listaCompletados = await res.json();
+}
 
 function crearTarjetaJuego(juego, contenedorDestino) {
     if (!juego) return;
@@ -35,8 +43,8 @@ function crearTarjetaJuego(juego, contenedorDestino) {
         <img src="${imagenLimpia}" onclick="abrirDetalles('${juego.id}')">
         <div class="info-juego">
             <h3>${juego.name}</h3>
-            <button class="btn-detalles" onclick="abrirDetalles('${juego.id}')">🔍 Ficha Completa</button>
-            <button class="btn-ia" onclick="pedirRecomendacionIA('${nombreLimpio}')">🌟 Similares (IA)</button>
+            <button class="btn-detalles" onclick="abrirDetalles('${juego.id}')">🔍 Ficha</button>
+            <button class="btn-ia" onclick="pedirRecomendacionIA('${nombreLimpio}')">🌟 IA</button>
             <button class="btn-favorito" onclick="toggleFavorito('${juego.id}', '${nombreLimpio}', '${imagenLimpia}')">⭐ Favorito</button>
         </div>`;
     contenedorDestino.appendChild(tarjeta);
@@ -44,12 +52,14 @@ function crearTarjetaJuego(juego, contenedorDestino) {
 
 async function abrirDetalles(id) {
     modalDetalles.classList.remove('oculto');
-    contenidoDetalles.innerHTML = '<div class="cargando">Rastreando datos...</div>';
+    contenidoDetalles.innerHTML = '<div class="cargando">Cargando...</div>';
+    await cargarListaCompletados();
+    
     try {
         const res = await fetch(`${API_URL_DETALLES}/${id}`);
         const data = await res.json();
         urlSiguientePagina = data.siguientePagina;
-        logrosCargadosActuales = data.trofeos.length; // Inicializamos contador
+        logrosCargadosActuales = data.trofeos.length;
 
         let vidHtml = data.trailers[0] ? `<video controls width="100%" class="video-trailer" src="${data.trailers[0].data.max}"></video>` : '<p class="aviso-vacio">🎥 Sin trailers.</p>';
 
@@ -57,14 +67,21 @@ async function abrirDetalles(id) {
         if (data.trofeos.length > 0) {
             logrosHtml = `
                 <div class="contador-logros-contenedor">
-                    🏆 <span id="contador-texto">Has descubierto ${logrosCargadosActuales} logros</span>
+                    🏆 <span id="contador-texto">Cargados: ${logrosCargadosActuales}</span>
                 </div>
                 <div id="contenedor-logros-lista" class="grid-logros">
-                    ${data.trofeos.map(t => `<div class="tarjeta-logro"><img src="${t.image || 'https://via.placeholder.com/50'}"><div><h4>${t.name}</h4><p>${t.description || ''}</p></div></div>`).join('')}
+                    ${data.trofeos.map(t => {
+                        const estaCompletado = listaCompletados.includes(t.id.toString());
+                        return `
+                        <div class="tarjeta-logro ${estaCompletado ? 'completado' : ''}" id="logro-${t.id}" onclick="marcarLogro('${t.id}')">
+                            <img src="${t.image || 'https://via.placeholder.com/50'}">
+                            <div><h4>${t.name}</h4><p>${t.description || ''}</p></div>
+                        </div>`;
+                    }).join('')}
                 </div>
-                ${urlSiguientePagina ? '<button id="btn-ver-mas-logros" class="btn-ia" style="width:100%; margin-top:15px;" onclick="cargarMasLogros()">📥 Cargar más logros...</button>' : ''}`;
+                ${urlSiguientePagina ? '<button id="btn-ver-mas-logros" class="btn-ia" style="width:100%;" onclick="cargarMasLogros()">📥 Cargar más...</button>' : ''}`;
         } else {
-            logrosHtml = '<div class="aviso-coleccion"><h3>⚠️ Sin logros individuales</h3><p>Busca la colección principal (Ej: Master Chief Collection).</p></div>';
+            logrosHtml = '<div class="aviso-coleccion"><h3>⚠️ Sin logros</h3><p>Prueba con la colección principal.</p></div>';
         }
 
         contenidoDetalles.innerHTML = `
@@ -72,39 +89,45 @@ async function abrirDetalles(id) {
             <div class="info-texto"><h2>${data.info.name}</h2><div class="descripcion-scroll">${data.info.description}</div></div></div>
             <hr class="separador"><h3>🎥 Gameplay</h3>${vidHtml}
             <hr class="separador"><h3>📸 Galería</h3><div class="galeria-capturas">${data.capturas.map(c => `<img src="${c.image}" class="img-galeria">`).join('')}</div>
-            <hr class="separador"><h3>🏆 Logros</h3>${logrosHtml}`;
+            <hr class="separador"><h3>🏆 Checklist de Logros</h3>${logrosHtml}`;
     } catch (e) { console.error(e); }
+}
+
+async function marcarLogro(idLogro) {
+    const token = localStorage.getItem('token');
+    if (!token) return alert("Inicia sesión para marcar logros.");
+
+    const res = await fetch(`${API_URL_AUTH}/logros/completar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ idLogro })
+    });
+    const data = await res.json();
+    const elemento = document.getElementById(`logro-${idLogro}`);
+    if (data.completado) elemento.classList.add('completado');
+    else elemento.classList.remove('completado');
 }
 
 async function cargarMasLogros() {
     const btn = document.getElementById('btn-ver-mas-logros');
-    const textoContador = document.getElementById('contador-texto');
-    btn.innerText = "⏳ Cargando...";
+    btn.innerText = "⏳...";
+    const res = await fetch(`/api/juegos/logros-mas?url=${encodeURIComponent(urlSiguientePagina)}`);
+    const data = await res.json();
+    urlSiguientePagina = data.siguientePagina;
+    logrosCargadosActuales += data.trofeos.length;
+    document.getElementById('contador-texto').innerText = `Cargados: ${logrosCargadosActuales}`;
     
-    try {
-        const res = await fetch(`/api/juegos/logros-mas?url=${encodeURIComponent(urlSiguientePagina)}`);
-        const data = await res.json();
-        
-        urlSiguientePagina = data.siguientePagina;
-        logrosCargadosActuales += data.trofeos.length; // Sumamos al contador
-        
-        const lista = document.getElementById('contenedor-logros-lista');
-        data.trofeos.forEach(t => {
-            const div = document.createElement('div'); div.className = 'tarjeta-logro';
-            div.innerHTML = `<img src="${t.image || 'https://via.placeholder.com/50'}"><div><h4>${t.name}</h4><p>${t.description || ''}</p></div>`;
-            lista.appendChild(div);
-        });
-
-        // Actualizamos el texto del contador
-        textoContador.innerText = `Has descubierto ${logrosCargadosActuales} logros`;
-
-        if (!urlSiguientePagina) {
-            btn.remove();
-            textoContador.innerText = `✅ ¡Cacería completa! Encontraste los ${logrosCargadosActuales} logros.`;
-        } else {
-            btn.innerText = "📥 Cargar más logros...";
-        }
-    } catch (e) { alert("Error al cargar."); }
+    const lista = document.getElementById('contenedor-logros-lista');
+    data.trofeos.forEach(t => {
+        const estaCompletado = listaCompletados.includes(t.id.toString());
+        const div = document.createElement('div');
+        div.className = `tarjeta-logro ${estaCompletado ? 'completado' : ''}`;
+        div.id = `logro-${t.id}`;
+        div.onclick = () => marcarLogro(t.id);
+        div.innerHTML = `<img src="${t.image || 'https://via.placeholder.com/50'}"><div><h4>${t.name}</h4><p>${t.description || ''}</p></div>`;
+        lista.appendChild(div);
+    });
+    if (!urlSiguientePagina) btn.remove(); else btn.innerText = "📥 Cargar más...";
 }
 
 async function toggleFavorito(id, n, i) {
@@ -115,13 +138,12 @@ async function toggleFavorito(id, n, i) {
 }
 
 async function abrirFavoritos() {
-    modalFavoritos.classList.remove('oculto'); contenedorFavoritos.innerHTML = '<p class="cargando">Abriendo bóveda...</p>';
+    modalFavoritos.classList.remove('oculto'); contenedorFavoritos.innerHTML = '...';
     const res = await fetch(`${API_URL_AUTH}/favoritos`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
     const favs = await res.json(); contenedorFavoritos.innerHTML = '';
-    if (favs.length === 0) return contenedorFavoritos.innerHTML = '<p>Vacio.</p>';
     favs.forEach(f => {
         const d = document.createElement('div'); d.className = 'tarjeta-juego';
-        d.innerHTML = `<img src="${f.imagen}" onclick="abrirDetalles('${f.idJuego}')"><div class="info-juego"><h3>${f.nombre}</h3><button class="btn-favorito" onclick="toggleFavorito('${f.idJuego}', '${f.nombre.replace(/'/g, "\\'")}', '${f.imagen}'); abrirFavoritos();">❌ Quitar</button></div>`;
+        d.innerHTML = `<img src="${f.imagen}" onclick="abrirDetalles('${f.idJuego}')"><h3>${f.nombre}</h3><button onclick="toggleFavorito('${f.idJuego}', '${f.nombre}', '${f.imagen}'); abrirFavoritos();">❌</button>`;
         contenedorFavoritos.appendChild(d);
     });
 }
@@ -136,9 +158,8 @@ async function pedirRecomendacionIA(n) {
 function verificarSesion() {
     const u = localStorage.getItem('username');
     if (u) {
-        panelUsuario.innerHTML = `<button id="btn-f" class="btn-auth">⭐ Favoritos</button><span class="user-badge">👤 ${u}</span><button id="btn-s" class="btn-auth">Salir</button>`;
+        panelUsuario.innerHTML = `<button id="btn-f" class="btn-auth">⭐ Favs</button><span class="user-badge">👤 ${u}</span><button onclick="localStorage.clear(); location.reload();" class="btn-auth">Salir</button>`;
         document.getElementById('btn-f').onclick = abrirFavoritos;
-        document.getElementById('btn-s').onclick = () => { localStorage.clear(); location.reload(); };
     }
 }
 
@@ -147,11 +168,11 @@ formAuth.onsubmit = async (e) => {
     const em = document.getElementById('auth-email').value; const pa = document.getElementById('auth-password').value; const us = document.getElementById('auth-username').value;
     const res = await fetch(`${API_URL_AUTH}${esModoRegistro ? '/registro' : '/login'}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: us, email: em, password: pa }) });
     const data = await res.json();
-    if (data.token) { localStorage.setItem('token', data.token); localStorage.setItem('username', data.username); location.reload(); } else { alert(data.mensaje || data.error); }
+    if (data.token) { localStorage.setItem('token', data.token); localStorage.setItem('username', data.username); location.reload(); } else alert("Error");
 };
 
 async function obtenerJuegos(b = '') {
-    contenedor.innerHTML = '<div class="cargando">Cazando...</div>';
+    contenedor.innerHTML = 'Cazando...';
     const res = await fetch(b ? `${API_URL_JUEGOS}?search=${b}` : API_URL_JUEGOS);
     const js = await res.json(); contenedor.innerHTML = '';
     js.forEach(j => crearTarjetaJuego(j, contenedor));

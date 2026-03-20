@@ -415,3 +415,27 @@ h1 {
     font-size: 1rem;
     box-shadow: 0 4px 15px rgba(255, 183, 0, 0.2);
 }
+.tarjeta-logro {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.tarjeta-logro.completado {
+    background: rgba(46, 204, 113, 0.2); /* Verde suave */
+    border-color: #2ecc71;
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.3);
+}
+
+.tarjeta-logro.completado img {
+    filter: drop-shadow(0 0 5px #2ecc71);
+}
+
+.tarjeta-logro.completado h4 {
+    color: #2ecc71;
+}
+
+.tarjeta-logro:hover {
+    transform: translateX(10px);
+    background: rgba(255, 255, 255, 0.05);
+}
