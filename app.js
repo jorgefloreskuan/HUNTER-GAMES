@@ -16,18 +16,24 @@ let esModoRegistro = false;
 let urlSiguientePagina = null;
 let listaCompletados = [];
 
-// --- SESIÓN ---
+// --- SESIÓN Y PANEL ---
 function verificarSesion() {
     const u = localStorage.getItem('username');
     if (u) {
-        panelUsuario.innerHTML = `<span class="user-badge">👤 ${u}</span><button onclick="localStorage.clear(); location.reload();" class="btn-auth">Salir</button>`;
+        panelUsuario.innerHTML = `
+            <button id="btn-abrir-favs" class="btn-auth">⭐ Mis Favoritos</button>
+            <span class="user-badge">👤 ${u}</span>
+            <button onclick="localStorage.clear(); location.reload();" class="btn-auth">Salir</button>
+        `;
+        document.getElementById('btn-abrir-favs').onclick = abrirFavoritos;
     } else {
         panelUsuario.innerHTML = `<button id="btn-abrir-auth" class="btn-auth">Entrar / Registrarse</button>`;
-        document.getElementById('btn-abrir-auth').onclick = () => modalAuth.classList.remove('oculto');
+        const btn = document.getElementById('btn-abrir-auth');
+        if(btn) btn.onclick = () => modalAuth.classList.remove('oculto');
     }
 }
 
-// --- LOGROS Y PROGRESO ---
+// --- BARRA DE PROGRESO ---
 function actualizarBarra() {
     const todos = document.querySelectorAll('.tarjeta-logro').length;
     const hechos = document.querySelectorAll('.tarjeta-logro.completado').length;
@@ -41,11 +47,114 @@ function actualizarBarra() {
     }
 }
 
-async function marcarLogro(id) {
+// --- FUNCIÓN PARA CREAR TARJETAS (CON FAVORITOS RECUPERADOS) ---
+function crearTarjetaJuego(j, destino) {
+    if (!j) return;
+    const d = document.createElement('div');
+    d.className = 'tarjeta-juego';
+    const n = j.name.replace(/'/g, "\\'");
+    const img = j.background_image || 'https://via.placeholder.com/400x225';
+    
+    d.innerHTML = `
+        <img src="${img}" onclick="abrirDetalles('${j.id}')">
+        <div class="info-juego">
+            <h3>${j.name}</h3>
+            <div class="botones-grid">
+                <button class="btn-ia" onclick="pedirRecomendacionIA('${n}')">🌟 IA</button>
+                <button class="btn-favorito" onclick="toggleFavorito('${j.id}', '${n}', '${img}')">⭐ Guardar</button>
+            </div>
+        </div>`;
+    destino.appendChild(d);
+}
+
+// --- IA CON REPARACIÓN DE CARGA ---
+async function pedirRecomendacionIA(n) {
+    modalIA.classList.remove('oculto');
+    contenedorRecomendaciones.innerHTML = ''; 
+    mensajeIA.classList.remove('oculto');
+    mensajeIA.innerHTML = `
+        <div class="rastreo-ia-contenedor">
+            <div class="rastreo-ia-icono">🛰️</div>
+            <h3>Rastreador Géminis</h3>
+            <p>Escaneando ADN de: <strong>${n}</strong></p>
+            <div class="rastreo-ia-barra"><div class="rastreo-ia-llenado"></div></div>
+        </div>`;
+
+    try {
+        const res = await fetch(`${API_URL_AUTH}/recomendaciones/${encodeURIComponent(n)}`);
+        const sims = await res.json();
+        
+        mensajeIA.classList.add('oculto'); // Ocultar barra de carga
+        mensajeIA.innerHTML = ''; // Limpiar mensaje
+        
+        if(sims.length > 0) {
+            sims.forEach(juego => crearTarjetaJuego(juego, contenedorRecomendaciones));
+        } else {
+            mensajeIA.classList.remove('oculto');
+            mensajeIA.innerHTML = "🌌 No hay juegos similares en este sector.";
+        }
+    } catch (e) {
+        mensajeIA.innerHTML = "🛑 Error de conexión con la IA.";
+    }
+}
+
+// --- FAVORITOS ---
+async function toggleFavorito(id, n, img) {
+    const t = localStorage.getItem('token');
+    if (!t) return modalAuth.classList.remove('oculto');
+    const res = await fetch(`${API_URL_AUTH}/favoritos`, { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` }, 
+        body: JSON.stringify({ idJuego: id, nombre: n, imagen: img }) 
+    });
+    const data = await res.json();
+    alert(data.mensaje || "Bóveda actualizada");
+}
+
+async function abrirFavoritos() {
+    const modalFavs = document.getElementById('modal-favoritos');
+    const contFavs = document.getElementById('contenedor-favoritos');
+    modalFavs.classList.remove('oculto');
+    contFavs.innerHTML = 'Cargando favoritos...';
+    
+    const res = await fetch(`${API_URL_AUTH}/favoritos`, { 
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } 
+    });
+    const f = await res.json();
+    contFavs.innerHTML = '';
+    if(f.length === 0) contFavs.innerHTML = "Tu colección está vacía.";
+    f.forEach(fav => crearTarjetaJuego(fav, contFavs));
+}
+
+// --- DETALLES ---
+async function abrirDetalles(id) {
+    modalDetalles.classList.remove('oculto');
+    contenidoDetalles.innerHTML = 'Cargando...';
     const token = localStorage.getItem('token');
-    if (!token) return modalAuth.classList.remove('oculto');
+    if (token) {
+        const rComp = await fetch(`${API_URL_AUTH}/logros/completados`, { headers: { 'Authorization': `Bearer ${token}` } });
+        listaCompletados = await rComp.json();
+    }
+    const res = await fetch(`${API_URL_AUTH}/juegos/detalles/${id}`);
+    const data = await res.json();
+    
+    contenidoDetalles.innerHTML = `
+        <div class="cabecera-juego"><img src="${data.info.background_image}" class="img-principal">
+        <div class="info-texto"><h2>${data.info.name}</h2><p>${data.info.description}</p></div></div>
+        <hr>
+        <div class="progreso-contenedor"><div class="progreso-texto" id="porcentaje-numero">0%</div><div class="progreso-barra" id="barra-llenado"></div></div>
+        <div id="contenedor-logros-lista" class="grid-logros">
+            ${data.trofeos.map(t => `<div class="tarjeta-logro ${listaCompletados.includes(t.id.toString()) ? 'completado' : ''}" id="logro-${t.id}" onclick="marcarLogro('${t.id}')">
+                <img src="${t.image || 'https://via.placeholder.com/50'}"><h4>${t.name}</h4></div>`).join('')}
+        </div>`;
+    setTimeout(actualizarBarra, 100);
+}
+
+async function marcarLogro(id) {
+    const t = localStorage.getItem('token');
+    if(!t) return modalAuth.classList.remove('oculto');
     const res = await fetch(`${API_URL_AUTH}/logros/completar`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${t}` },
         body: JSON.stringify({ idLogro: id.toString() })
     });
     const data = await res.json();
@@ -53,113 +162,18 @@ async function marcarLogro(id) {
     actualizarBarra();
 }
 
-async function abrirDetalles(id) {
-    modalDetalles.classList.remove('oculto');
-    contenidoDetalles.innerHTML = '<div class="cargando">🛰️ Escaneando base de datos...</div>';
-    
-    const token = localStorage.getItem('token');
-    if (token) {
-        const rComp = await fetch(`${API_URL_AUTH}/logros/completados`, { headers: { 'Authorization': `Bearer ${token}` } });
-        listaCompletados = await rComp.json();
-    }
-
-    try {
-        const res = await fetch(`${API_URL_AUTH}/juegos/detalles/${id}`);
-        const data = await res.json();
-        urlSiguientePagina = data.siguientePagina;
-
-        let logrosHtml = `
-            <div class="progreso-contenedor">
-                <div class="progreso-texto" id="porcentaje-numero">0%</div>
-                <div class="progreso-barra" id="barra-llenado"></div>
-            </div>
-            <div id="contenedor-logros-lista" class="grid-logros">
-                ${data.trofeos.map(t => {
-                    const ok = listaCompletados.includes(t.id.toString());
-                    return `<div class="tarjeta-logro ${ok ? 'completado' : ''}" id="logro-${t.id}" onclick="marcarLogro('${t.id}')">
-                        <img src="${t.image || 'https://via.placeholder.com/50'}">
-                        <div><h4>${t.name}</h4><p>${t.description || ''}</p></div>
-                    </div>`;
-                }).join('')}
-            </div>`;
-
-        contenidoDetalles.innerHTML = `
-            <div class="cabecera-juego"><img src="${data.info.background_image}" class="img-principal">
-            <div class="info-texto"><h2>${data.info.name}</h2><div class="descripcion-scroll">${data.info.description}</div></div></div>
-            <hr class="separador"><h3>🏆 Checklist de Cacería</h3>${logrosHtml}`;
-        
-        setTimeout(actualizarBarra, 100);
-    } catch (e) { contenidoDetalles.innerHTML = "Error al cargar."; }
-}
-
-// --- IA ---
-async function pedirRecomendacionIA(n) {
-    modalIA.classList.remove('oculto');
-    contenedorRecomendaciones.innerHTML = '';
-    mensajeIA.classList.remove('oculto');
-    mensajeIA.innerHTML = `
-        <div class="rastreo-ia-contenedor">
-            <div class="rastreo-ia-icono">🛰️</div>
-            <h3>Rastreador Géminis Activado</h3>
-            <p>Escaneando el ADN de <span class="destacado">${n}</span>...</p>
-            <div class="rastreo-ia-barra"><div class="rastreo-ia-llenado"></div></div>
-        </div>`;
-    try {
-        const res = await fetch(`${API_URL_AUTH}/recomendaciones/${encodeURIComponent(n)}`);
-        const sims = await res.json();
-        mensajeIA.classList.add('oculto');
-        sims.forEach(j => crearTarjetaJuego(j, contenedorRecomendaciones));
-    } catch (e) { mensajeIA.innerHTML = "🛑 Error de conexión con la IA."; }
-}
-
-function crearTarjetaJuego(j, destino) {
-    if (!j) return;
-    const d = document.createElement('div');
-    d.className = 'tarjeta-juego';
-    const img = j.background_image || 'https://via.placeholder.com/400x225';
-    d.innerHTML = `
-        <img src="${img}" onclick="abrirDetalles('${j.id}')">
-        <div class="info-juego">
-            <h3>${j.name}</h3>
-            <button class="btn-ia" onclick="pedirRecomendacionIA('${j.name.replace(/'/g, "\\'")}')">🌟 IA</button>
-        </div>`;
-    destino.appendChild(d);
-}
-
-// EVENTOS
-formAuth.onsubmit = async (e) => {
-    e.preventDefault();
-    const em = document.getElementById('auth-email').value;
-    const pa = document.getElementById('auth-password').value;
-    const us = document.getElementById('auth-username').value;
-    const res = await fetch(`${API_URL_AUTH}${esModoRegistro ? '/registro' : '/login'}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: us, email: em, password: pa })
-    });
-    const data = await res.json();
-    if (data.token) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('username', data.username);
-        location.reload();
-    } else alert("Error de acceso");
-};
-
-document.getElementById('link-cambiar-modo').onclick = () => {
-    esModoRegistro = !esModoRegistro;
-    document.getElementById('auth-username').classList.toggle('oculto');
-};
-
+// --- INICIO ---
 btnBuscar.onclick = () => obtenerJuegos(inputBusqueda.value);
-document.querySelectorAll('.cerrar').forEach(btn => btn.onclick = () => {
-    modalAuth.classList.add('oculto'); modalIA.classList.add('oculto'); modalDetalles.classList.add('oculto');
-});
-
 async function obtenerJuegos(b = '') {
     const res = await fetch(b ? `/api/juegos?search=${b}` : '/api/juegos');
     const js = await res.json();
     contenedor.innerHTML = '';
     js.forEach(j => crearTarjetaJuego(j, contenedor));
 }
+
+document.querySelectorAll('.cerrar').forEach(btn => btn.onclick = () => {
+    document.querySelectorAll('.modal').forEach(m => m.classList.add('oculto'));
+});
 
 verificarSesion();
 obtenerJuegos();

@@ -1,511 +1,228 @@
-body {
-    background-color: #151515;
-    color: white;
-    font-family: Arial, sans-serif;
+ /* --- VARIABLES Y RESET --- */
+:root {
+    --primary: #ffb700;       /* Amarillo Neón */
+    --secondary: #2ecc71;     /* Verde Logros */
+    --bg-dark: #0a0a0a;       /* Fondo Profundo */
+    --card-bg: #151515;       /* Fondo Tarjetas */
+    --text-main: #e0e0e0;
+    --text-dim: #888;
+    --shadow: 0 8px 25px rgba(0,0,0,0.5);
+}
+
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    line-height: 1.6;
+}
+
+/* --- NAVEGACIÓN --- */
 header {
-    text-align: center;
-    padding: 2rem;
-    background-color: #202020;
-    border-bottom: 2px solid #e50914;
+    background: #000;
+    padding: 1rem 5%;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 2px solid #222;
 }
 
-h1 {
-    margin-top: 0;
-}
-
-/* Estilos para el Buscador */
-.buscador {
-    margin-top: 15px;
+nav {
     display: flex;
-    justify-content: center;
-    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
 }
 
-#input-busqueda {
-    padding: 10px 15px;
-    width: 300px;
-    border-radius: 8px;
+.logo {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.busqueda-container {
+    display: flex;
+    flex: 1;
+    max-width: 600px;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 8px 0 0 8px;
     border: none;
-    background-color: #333;
+    background: #1a1a1a;
     color: white;
-    font-size: 1rem;
+    outline: none;
 }
 
 #btn-buscar {
-    padding: 10px 20px;
-    border-radius: 8px;
+    padding: 0 25px;
+    border-radius: 0 8px 8px 0;
     border: none;
-    background-color: #e50914;
-    color: white;
+    background: var(--primary);
+    color: black;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.2s;
 }
 
-#btn-buscar:hover {
-    background-color: #b20710;
-}
-
-/* Estilos para el Grid y las Tarjetas */
-.grid-juegos {
+/* --- GRID DE JUEGOS --- */
+#contenedor-juegos, .grid-juegos, .grid-recomendaciones {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    padding: 40px 5%;
 }
 
 .tarjeta-juego {
-    background-color: #202020;
-    border-radius: 12px;
+    background: var(--card-bg);
+    border-radius: 15px;
     overflow: hidden;
-    transition: transform 0.2s;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #222;
 }
 
 .tarjeta-juego:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(229, 9, 20, 0.2);
+    transform: translateY(-10px);
+    box-shadow: 0 10px 30px rgba(255, 183, 0, 0.1);
+    border-color: var(--primary);
 }
 
 .tarjeta-juego img {
     width: 100%;
-    height: 200px;
+    height: 180px;
     object-fit: cover;
+    cursor: pointer;
 }
 
 .info-juego {
-    padding: 15px;
+    padding: 20px;
 }
 
 .info-juego h3 {
-    margin: 0 0 10px 0;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.info-juego p {
-    margin: 5px 0;
-    color: #aaaaaa;
-    font-size: 0.9rem;
+/* Botones en Cuadrícula (IA y Favorito) */
+.botones-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
 }
 
-/* Estilos para las Plataformas */
-.plataformas {
-    color: #4CAF50 !important; /* Verde brillante */
-    font-weight: bold;
-    font-size: 0.85rem;
-    margin-top: 10px !important;
-}
-
-.cargando {
-    text-align: center;
-    font-size: 1.2rem;
-    color: #aaaaaa;
-    grid-column: 1 / -1;
-}
-
-/* --- NUEVOS ESTILOS PARA LOGIN Y REGISTRO --- */
-.header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.btn-auth {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px 15px;
+button {
+    padding: 10px;
     border-radius: 8px;
+    border: none;
     cursor: pointer;
     font-weight: bold;
+    transition: 0.2s;
 }
 
-.btn-auth:hover {
-    background-color: #45a049;
-}
+.btn-ia { background: #6e45e2; color: white; }
+.btn-ia:hover { background: #8e67ff; }
 
-#btn-cerrar-sesion {
-    background-color: #e50914;
-}
+.btn-favorito { background: #333; color: white; }
+.btn-favorito:hover { background: #ff4757; }
 
-#btn-cerrar-sesion:hover {
-    background-color: #b20710;
-}
+.btn-auth { background: transparent; border: 1px solid var(--primary); color: var(--primary); margin-left: 10px; }
+.btn-auth:hover { background: var(--primary); color: black; }
 
-/* Modal (Fondo oscuro transparente) */
+/* --- MODALES --- */
 .modal {
-    display: flex;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    justify-content: center;
-    align-items: center;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 1000;
 }
 
-.modal-contenido {
-    background-color: #202020;
-    padding: 30px;
-    border-radius: 12px;
-    width: 350px;
-    text-align: center;
-    position: relative;
-    box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+.oculto { display: none !important; }
+
+.contenido-modal {
+    background: #111; padding: 30px; border-radius: 20px; width: 90%; max-width: 450px;
+    border: 1px solid #333; position: relative;
 }
+
+.ancho-grande { max-width: 1000px; max-height: 90vh; overflow-y: auto; }
 
 .cerrar {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    color: #aaaaaa;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
+    position: absolute; top: 15px; right: 20px; font-size: 2rem; cursor: pointer; color: var(--text-dim);
 }
 
-.cerrar:hover {
-    color: white;
+/* --- BARRA DE PROGRESO DE LOGROS --- */
+.progreso-contenedor {
+    background: #222; border-radius: 30px; height: 30px; width: 100%;
+    margin: 20px 0; overflow: hidden; border: 1px solid #444; position: relative;
 }
 
-#form-auth {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 20px;
+.progreso-barra {
+    background: linear-gradient(90deg, #2ecc71, #27ae60);
+    height: 100%; width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
 }
 
-#form-auth input {
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #444;
-    background-color: #333;
-    color: white;
+.progreso-texto {
+    position: absolute; width: 100%; text-align: center; line-height: 30px;
+    font-size: 0.9rem; font-weight: 800; color: white; text-shadow: 1px 1px 2px black;
 }
 
-#form-auth button {
-    padding: 10px;
-    background-color: #e50914;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-#form-auth button:hover {
-    background-color: #b20710;
-}
-
-.cambiar-modo {
-    font-size: 0.9rem;
-    margin-top: 15px;
-}
-
-.cambiar-modo a {
-    color: #e50914;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.mensaje-error {
-    color: #ff4c4c;
-    font-size: 0.9rem;
-    margin-top: 10px;
-    min-height: 20px;
-}
-
-.oculto {
-    display: none !important;
-}
-
-/* --- ESTILOS PARA LA IA --- */
-.btn-ia {
-    background-color: #6a0dad; /* Morado tecnológico para la IA */
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    width: 100%;
-    margin-top: 10px;
-    transition: background-color 0.2s;
-}
-
-.btn-ia:hover {
-    background-color: #8a2be2;
-}
-
-.modal-ia-contenido {
-    width: 80%;
-    max-width: 900px;
-    max-height: 80vh;
-    overflow-y: auto;
-}
-
-.modal-ia-contenido h2 {
-    color: #a855f7;
-    margin-top: 0;
-}
-/* --- NUEVOS ESTILOS PARA LA PANTALLA DE DETALLES --- */
-.btn-detalles {
-    background-color: #008CBA;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    width: 100%;
-    margin-top: 10px;
-    transition: background-color 0.2s;
-}
-
-.btn-detalles:hover { background-color: #007399; }
-
-.modal-detalles-contenido {
-    width: 90%;
-    max-width: 1000px;
-    max-height: 90vh;
-    overflow-y: auto;
-    text-align: left;
-    background-color: #1a1a1a;
-}
-
-.cabecera-juego {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-}
-
-.cabecera-juego img {
-    width: 100%;
-    max-width: 350px;
-    border-radius: 12px;
-    object-fit: cover;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-}
-
-.info-texto-juego { flex: 1; min-width: 300px; }
-.info-texto-juego h2 { margin-top: 0; font-size: 2rem; color: #e50914; }
-.descripcion-juego { line-height: 1.6; color: #cccccc; font-size: 1rem; }
-
-/* Galería de Imágenes */
-.galeria-capturas {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 10px;
-    margin-bottom: 20px;
-}
-.galeria-capturas img { width: 100%; border-radius: 8px; transition: transform 0.2s; }
-.galeria-capturas img:hover { transform: scale(1.05); }
-
-/* Logros/Trofeos */
+/* --- CHECKLIST DE LOGROS --- */
 .grid-logros {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 15px;
+    display: grid; gap: 12px; margin-top: 20px;
 }
+
 .tarjeta-logro {
-    background-color: #2b2b2b;
-    padding: 10px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-.tarjeta-logro img { width: 50px; height: 50px; border-radius: 5px; }
-.tarjeta-logro h4 { margin: 0 0 5px 0; font-size: 0.95rem; color: #4CAF50; }
-.tarjeta-logro p { margin: 0; font-size: 0.8rem; color: #aaaaaa; }
-
-/* --- ESTILOS PARA FAVORITOS --- */
-.btn-favorito {
-    background-color: transparent;
-    border: 1px solid #ffb703;
-    color: #ffb703;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    width: 100%;
-    margin-top: 10px;
-    transition: all 0.2s;
+    background: #1a1a1a; padding: 12px; border-radius: 10px; display: flex;
+    align-items: center; gap: 15px; cursor: pointer; border: 1px solid #333;
+    transition: 0.2s;
 }
 
-.btn-favorito:hover {
-    background-color: #ffb703;
-    color: #151515;
-}
-
-#btn-abrir-favoritos {
-    background-color: #ffb703;
-    color: #151515;
-}
-
-#btn-abrir-favoritos:hover {
-    background-color: #e59400;
-}
-.contador-logros {
-    background: #ffb703;
-    color: #151515;
-    padding: 5px 15px;
-    border-radius: 20px;
-    display: inline-block;
-    font-weight: bold;
-    margin-bottom: 15px;
-    font-size: 0.9em;
-}
-
-.aviso-coleccion {
-    background: rgba(255, 183, 3, 0.1);
-    border: 1px dashed #ffb703;
-    padding: 20px;
-    border-radius: 12px;
-    text-align: center;
-    color: #ccc;
-}
-
-.aviso-coleccion h3 {
-    color: #ffb703;
-    margin-bottom: 10px;
-}
-
-.aviso-vacio {
-    color: #888;
-    font-style: italic;
-    text-align: center;
-    padding: 10px;
-}
-#btn-ver-mas-logros {
-    background: #ffb700;
-    color: black;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.3s;
-}
-
-#btn-ver-mas-logros:hover {
-    background: #e6a600;
-    transform: scale(1.02);
-}
-.contador-logros-contenedor {
-    background: #ffb700;
-    color: #000;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: bold;
-    margin-bottom: 15px;
-    text-align: center;
-    font-size: 1rem;
-    box-shadow: 0 4px 15px rgba(255, 183, 0, 0.2);
-}
-.tarjeta-logro {
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-}
+.tarjeta-logro img { width: 50px; height: 50px; border-radius: 8px; }
 
 .tarjeta-logro.completado {
-    background: rgba(46, 204, 113, 0.2); /* Verde suave */
-    border-color: #2ecc71;
-    box-shadow: 0 0 15px rgba(46, 204, 113, 0.3);
+    background: rgba(46, 204, 113, 0.1);
+    border-color: var(--secondary);
 }
 
-.tarjeta-logro.completado img {
-    filter: drop-shadow(0 0 5px #2ecc71);
-}
+.tarjeta-logro.completado h4 { color: var(--secondary); }
 
-.tarjeta-logro.completado h4 {
-    color: #2ecc71;
-}
-
-.tarjeta-logro:hover {
-    transform: translateX(10px);
-    background: rgba(255, 255, 255, 0.05);
-}
-/* Contenedor de la barra */
-.progreso-contenedor {
-    background: #222;
-    border-radius: 20px;
-    height: 25px;
-    width: 100%;
-    margin: 15px 0;
-    overflow: hidden;
-    border: 1px solid #444;
-    position: relative;
-}
-
-/* La barra que se mueve */
-.progreso-barra {
-    background: linear-gradient(90deg, #2ecc71, #27ae60);
-    height: 100%;
-    width: 0%; /* Empieza en 0 */
-    transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
-}
-
-/* Texto del porcentaje */
-.progreso-texto {
-    position: absolute;
-    width: 100%;
-    text-align: center;
-    line-height: 25px;
-    font-size: 0.85rem;
-    font-weight: bold;
-    color: white;
-    text-shadow: 1px 1px 2px black;
-}
-/* BARRA DE PROGRESO DE LOGROS */
-.progreso-contenedor {
-    background: #222; border-radius: 20px; height: 25px; width: 100%;
-    margin: 15px 0; overflow: hidden; border: 1px solid #444; position: relative;
-}
-.progreso-barra {
-    background: linear-gradient(90deg, #2ecc71, #27ae60);
-    height: 100%; width: 0%; transition: width 0.5s ease-out;
-    box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
-}
-.progreso-texto {
-    position: absolute; width: 100%; text-align: center; line-height: 25px;
-    font-size: 0.85rem; font-weight: bold; color: white; text-shadow: 1px 1px 2px black;
-}
-
-/* TARJETAS DE LOGRO COMPLETADAS */
-.tarjeta-logro.completado {
-    background: rgba(46, 204, 113, 0.15);
-    border: 1px solid #2ecc71;
-    box-shadow: 0 0 10px rgba(46, 204, 113, 0.2);
-}
-.tarjeta-logro.completado h4 { color: #2ecc71; }
-
-/* RASTREADOR IA ANIMADO */
+/* --- RASTREADOR IA --- */
 .rastreo-ia-contenedor {
-    text-align: center; padding: 20px; background: rgba(0,0,0,0.5);
-    border-radius: 15px; border: 1px solid #ffb700;
-}
-.rastreo-ia-icono { font-size: 3rem; animation: flotar 2s infinite; }
-.rastreo-ia-barra { background: #222; border-radius: 10px; height: 10px; width: 80%; margin: 15px auto; overflow: hidden; }
-.rastreo-ia-llenado {
-    background: #ffb700; height: 100%; width: 0%;
-    animation: cargarInfinito 4s infinite; box-shadow: 0 0 10px #ffb700;
+    text-align: center; padding: 30px;
 }
 
-@keyframes flotar { 50% { transform: translateY(-10px); } }
-@keyframes cargarInfinito { 0% { width: 0%; } 50% { width: 95%; } 100% { width: 0%; } }
-.destacado { color: #ffb700; font-weight: bold; }
+.rastreo-ia-icono { font-size: 3.5rem; margin-bottom: 15px; animation: flotar 2s infinite; }
+
+.rastreo-ia-barra {
+    background: #222; border-radius: 10px; height: 12px; width: 100%; 
+    margin: 20px 0; overflow: hidden;
+}
+
+.rastreo-ia-llenado {
+    background: var(--primary); height: 100%; width: 0%;
+    animation: cargarInfinito 3s infinite ease-in-out;
+    box-shadow: 0 0 15px var(--primary);
+}
+
+/* --- ANIMACIONES --- */
+@keyframes flotar { 50% { transform: translateY(-15px); } }
+@keyframes cargarInfinito { 0% { width: 0%; } 50% { width: 90%; } 100% { width: 0%; } }
+
+/* --- DETALLES --- */
+.cabecera-juego { display: flex; gap: 30px; margin-bottom: 25px; }
+.img-principal { width: 300px; border-radius: 15px; }
+.info-texto h2 { color: var(--primary); font-size: 2rem; margin-bottom: 10px; }
+.info-texto p { color: var(--text-dim); font-size: 0.95rem; }
+
+hr { border: 0; border-top: 1px solid #333; margin: 25px 0; }
+
+.user-badge { color: white; font-weight: bold; background: #333; padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; }
