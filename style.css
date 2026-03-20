@@ -1,0 +1,360 @@
+body {
+    background-color: #151515;
+    color: white;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    text-align: center;
+    padding: 2rem;
+    background-color: #202020;
+    border-bottom: 2px solid #e50914;
+}
+
+h1 {
+    margin-top: 0;
+}
+
+/* Estilos para el Buscador */
+.buscador {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+#input-busqueda {
+    padding: 10px 15px;
+    width: 300px;
+    border-radius: 8px;
+    border: none;
+    background-color: #333;
+    color: white;
+    font-size: 1rem;
+}
+
+#btn-buscar {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background-color: #e50914;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#btn-buscar:hover {
+    background-color: #b20710;
+}
+
+/* Estilos para el Grid y las Tarjetas */
+.grid-juegos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.tarjeta-juego {
+    background-color: #202020;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.tarjeta-juego:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(229, 9, 20, 0.2);
+}
+
+.tarjeta-juego img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.info-juego {
+    padding: 15px;
+}
+
+.info-juego h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.2rem;
+}
+
+.info-juego p {
+    margin: 5px 0;
+    color: #aaaaaa;
+    font-size: 0.9rem;
+}
+
+/* Estilos para las Plataformas */
+.plataformas {
+    color: #4CAF50 !important; /* Verde brillante */
+    font-weight: bold;
+    font-size: 0.85rem;
+    margin-top: 10px !important;
+}
+
+.cargando {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #aaaaaa;
+    grid-column: 1 / -1;
+}
+
+/* --- NUEVOS ESTILOS PARA LOGIN Y REGISTRO --- */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.btn-auth {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-auth:hover {
+    background-color: #45a049;
+}
+
+#btn-cerrar-sesion {
+    background-color: #e50914;
+}
+
+#btn-cerrar-sesion:hover {
+    background-color: #b20710;
+}
+
+/* Modal (Fondo oscuro transparente) */
+.modal {
+    display: flex;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-contenido {
+    background-color: #202020;
+    padding: 30px;
+    border-radius: 12px;
+    width: 350px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+}
+
+.cerrar {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: #aaaaaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.cerrar:hover {
+    color: white;
+}
+
+#form-auth {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+#form-auth input {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #444;
+    background-color: #333;
+    color: white;
+}
+
+#form-auth button {
+    padding: 10px;
+    background-color: #e50914;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#form-auth button:hover {
+    background-color: #b20710;
+}
+
+.cambiar-modo {
+    font-size: 0.9rem;
+    margin-top: 15px;
+}
+
+.cambiar-modo a {
+    color: #e50914;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.mensaje-error {
+    color: #ff4c4c;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    min-height: 20px;
+}
+
+.oculto {
+    display: none !important;
+}
+
+/* --- ESTILOS PARA LA IA --- */
+.btn-ia {
+    background-color: #6a0dad; /* Morado tecnológico para la IA */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+
+.btn-ia:hover {
+    background-color: #8a2be2;
+}
+
+.modal-ia-contenido {
+    width: 80%;
+    max-width: 900px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-ia-contenido h2 {
+    color: #a855f7;
+    margin-top: 0;
+}
+/* --- NUEVOS ESTILOS PARA LA PANTALLA DE DETALLES --- */
+.btn-detalles {
+    background-color: #008CBA;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+
+.btn-detalles:hover { background-color: #007399; }
+
+.modal-detalles-contenido {
+    width: 90%;
+    max-width: 1000px;
+    max-height: 90vh;
+    overflow-y: auto;
+    text-align: left;
+    background-color: #1a1a1a;
+}
+
+.cabecera-juego {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.cabecera-juego img {
+    width: 100%;
+    max-width: 350px;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.info-texto-juego { flex: 1; min-width: 300px; }
+.info-texto-juego h2 { margin-top: 0; font-size: 2rem; color: #e50914; }
+.descripcion-juego { line-height: 1.6; color: #cccccc; font-size: 1rem; }
+
+/* Galería de Imágenes */
+.galeria-capturas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.galeria-capturas img { width: 100%; border-radius: 8px; transition: transform 0.2s; }
+.galeria-capturas img:hover { transform: scale(1.05); }
+
+/* Logros/Trofeos */
+.grid-logros {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+.tarjeta-logro {
+    background-color: #2b2b2b;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.tarjeta-logro img { width: 50px; height: 50px; border-radius: 5px; }
+.tarjeta-logro h4 { margin: 0 0 5px 0; font-size: 0.95rem; color: #4CAF50; }
+.tarjeta-logro p { margin: 0; font-size: 0.8rem; color: #aaaaaa; }
+
+/* --- ESTILOS PARA FAVORITOS --- */
+.btn-favorito {
+    background-color: transparent;
+    border: 1px solid #ffb703;
+    color: #ffb703;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    margin-top: 10px;
+    transition: all 0.2s;
+}
+
+.btn-favorito:hover {
+    background-color: #ffb703;
+    color: #151515;
+}
+
+#btn-abrir-favoritos {
+    background-color: #ffb703;
+    color: #151515;
+}
+
+#btn-abrir-favoritos:hover {
+    background-color: #e59400;
+}
