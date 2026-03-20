@@ -13,12 +13,14 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname)));
 
-// --- 1. CONEXIÓN A MONGODB ---
+// 1. Servir archivos estáticos (CSS, JS, Imágenes)
+app.use(express.static(__dirname));
+
+// 2. CONEXIÓN A MONGODB
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('🟢 ¡Base de datos conectada con éxito!'))
-    .catch(err => console.error('🔴 Error conectando a MongoDB:', err));
+    .then(() => console.log('🟢 Base de datos conectada'))
+    .catch(err => console.error('🔴 Error DB:', err));
 
 const usuarioSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
@@ -30,12 +32,12 @@ const Usuario = mongoose.model('Usuario', usuarioSchema);
 
 const verificarToken = (req, res, next) => {
     const token = req.header('Authorization');
-    if (!token) return res.status(401).json({ error: 'Acceso denegado.' });
+    if (!token) return res.status(401).json({ error: 'Denegado' });
     try {
         const verificado = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
         req.usuario = verificado;
         next();
-    } catch (error) { res.status(400).json({ error: 'Token no válido.' }); }
+    } catch (error) { res.status(400).json({ error: 'Token inválido' }); }
 };
 
 // --- RUTAS DE API ---
@@ -46,18 +48,18 @@ app.post('/api/registro', async (req, res) => {
         const passwordEncriptada = await bcrypt.hash(password, salt);
         const nuevoUsuario = new Usuario({ username, email, password: passwordEncriptada });
         await nuevoUsuario.save();
-        res.status(201).json({ mensaje: '¡Cazador registrado!' });
-    } catch (error) { res.status(500).json({ error: 'Error.' }); }
+        res.status(201).json({ mensaje: 'Registrado' });
+    } catch (error) { res.status(500).json({ error: 'Error' }); }
 });
 
 app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const usuario = await Usuario.findOne({ email });
-        if (!usuario || !await bcrypt.compare(password, usuario.password)) return res.status(400).json({ error: 'Credenciales inválidas.' });
+        if (!usuario || !await bcrypt.compare(password, usuario.password)) return res.status(400).json({ error: 'Inválido' });
         const token = jwt.sign({ id: usuario._id, username: usuario.username }, process.env.JWT_SECRET, { expiresIn: '2h' });
         res.json({ token, username: usuario.username });
-    } catch (error) { res.status(500).json({ error: 'Error.' }); }
+    } catch (error) { res.status(500).json({ error: 'Error' }); }
 });
 
 app.post('/api/favoritos', verificarToken, async (req, res) => {
@@ -68,13 +70,13 @@ app.post('/api/favoritos', verificarToken, async (req, res) => {
         if (index === -1) {
             usuario.favoritos.push({ idJuego: idJuego.toString(), nombre, imagen });
             await usuario.save();
-            res.json({ mensaje: '⭐ Agregado.' });
+            res.json({ mensaje: '⭐ Agregado' });
         } else {
             usuario.favoritos.splice(index, 1);
             await usuario.save();
-            res.json({ mensaje: '❌ Eliminado.' });
+            res.json({ mensaje: '❌ Eliminado' });
         }
-    } catch (error) { res.status(500).json({ error: 'Error.' }); }
+    } catch (error) { res.status(500).json({ error: 'Error' }); }
 });
 
 app.get('/api/favoritos', verificarToken, async (req, res) => {
@@ -83,11 +85,11 @@ app.get('/api/favoritos', verificarToken, async (req, res) => {
 });
 
 app.get('/api/juegos', async (req, res) => {
-    const busqueda = req.query.search; 
+    const b = req.query.search; 
     let url = `https://api.rawg.io/api/games?key=${process.env.RAWG_API_KEY}&page_size=24`;
-    if (busqueda) url += `&search=${busqueda}`;
-    const respuesta = await axios.get(url);
-    res.json(respuesta.data.results);
+    if (b) url += `&search=${b}`;
+    const r = await axios.get(url);
+    res.json(r.data.results);
 });
 
 app.get('/api/juegos/detalles/:id', async (req, res) => {
@@ -112,10 +114,10 @@ app.get('/api/recomendaciones/:juego', async (req, res) => {
     res.json(respuestas.map(r => r.data.results[0]).filter(j => j !== undefined));
 });
 
-// --- RUTA COMPATIBLE CON RENDER ---
-// Hemos cambiado '*' por '(.*)' para que no dé error de parámetros
-app.get('(.*)', (req, res) => {
+// --- RUTA PARA EL HOME (SIN ASTERISCOS) ---
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(PORT, () => { console.log(`🚀 Hunter Games en línea puerto ${PORT}`); });
+// Arrancar servidor
+app.listen(PORT, () => { console.log(`🚀 Puerto ${PORT}`); });
