@@ -1,228 +1,36 @@
- /* --- VARIABLES Y RESET --- */
-:root {
-    --primary: #ffb700;       /* Amarillo Neón */
-    --secondary: #2ecc71;     /* Verde Logros */
-    --bg-dark: #0a0a0a;       /* Fondo Profundo */
-    --card-bg: #151515;       /* Fondo Tarjetas */
-    --text-main: #e0e0e0;
-    --text-dim: #888;
-    --shadow: 0 8px 25px rgba(0,0,0,0.5);
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-}
-
-body {
-    background-color: var(--bg-dark);
-    color: var(--text-main);
-    line-height: 1.6;
-}
-
-/* --- NAVEGACIÓN --- */
-header {
-    background: #000;
-    padding: 1rem 5%;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 2px solid #222;
-}
-
-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-}
-
-.logo {
-    font-size: 1.5rem;
-    font-weight: 900;
-    color: var(--primary);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-.busqueda-container {
-    display: flex;
-    flex: 1;
-    max-width: 600px;
-}
-
-input[type="text"] {
-    flex: 1;
-    padding: 12px 20px;
-    border-radius: 8px 0 0 8px;
-    border: none;
-    background: #1a1a1a;
-    color: white;
-    outline: none;
-}
-
-#btn-buscar {
-    padding: 0 25px;
-    border-radius: 0 8px 8px 0;
-    border: none;
-    background: var(--primary);
-    color: black;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-/* --- GRID DE JUEGOS --- */
-#contenedor-juegos, .grid-juegos, .grid-recomendaciones {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 30px;
-    padding: 40px 5%;
-}
-
-.tarjeta-juego {
-    background: var(--card-bg);
-    border-radius: 15px;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid #222;
-}
-
-.tarjeta-juego:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 10px 30px rgba(255, 183, 0, 0.1);
-    border-color: var(--primary);
-}
-
-.tarjeta-juego img {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-    cursor: pointer;
-}
-
-.info-juego {
-    padding: 20px;
-}
-
-.info-juego h3 {
-    font-size: 1.1rem;
-    margin-bottom: 15px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Botones en Cuadrícula (IA y Favorito) */
-.botones-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-button {
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.2s;
-}
-
-.btn-ia { background: #6e45e2; color: white; }
-.btn-ia:hover { background: #8e67ff; }
-
-.btn-favorito { background: #333; color: white; }
-.btn-favorito:hover { background: #ff4757; }
-
-.btn-auth { background: transparent; border: 1px solid var(--primary); color: var(--primary); margin-left: 10px; }
-.btn-auth:hover { background: var(--primary); color: black; }
-
-/* --- MODALES --- */
-.modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 1000;
-}
-
+ :root { --primary: #ffb700; --secondary: #2ecc71; --bg: #0a0a0a; }
+body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; }
+header { background: #000; padding: 15px; border-bottom: 2px solid #222; }
+nav { display: flex; justify-content: space-between; align-items: center; }
+.logo { font-weight: 900; color: var(--primary); }
 .oculto { display: none !important; }
+.modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); display:flex; align-items:center; justify-content:center; z-index:1000; }
+.contenido-modal { background:#111; padding:30px; border-radius:15px; border:1px solid #333; position:relative; }
+.ancho-grande { width: 90%; max-width: 1000px; max-height: 90vh; overflow-y: auto; }
+.cerrar { position: absolute; top: 10px; right: 20px; font-size: 2rem; cursor: pointer; }
 
-.contenido-modal {
-    background: #111; padding: 30px; border-radius: 20px; width: 90%; max-width: 450px;
-    border: 1px solid #333; position: relative;
-}
+/* Botones y Grid */
+.grid-juegos { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
+.tarjeta-juego { background:#151515; border-radius:10px; overflow:hidden; border:1px solid #222; }
+.tarjeta-juego img { width:100%; height:150px; object-fit:cover; }
+.info-juego { padding: 15px; }
+.botones-grid { display: grid; grid-template-columns: 1fr 50px; gap: 10px; }
+button { padding: 10px; border-radius: 5px; border:none; cursor:pointer; font-weight:bold; }
+.btn-ia { background: #6e45e2; color:white; }
+.btn-favorito { background: #333; color:white; }
+.btn-auth { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
 
-.ancho-grande { max-width: 1000px; max-height: 90vh; overflow-y: auto; }
+/* Barra de Progreso */
+.progreso-contenedor { background:#222; border-radius:20px; height:25px; width:100%; margin:15px 0; overflow:hidden; position:relative; }
+.progreso-barra { background:var(--secondary); height:100%; width:0%; transition: 0.5s; }
+.progreso-texto { position:absolute; width:100%; text-align:center; line-height:25px; font-size:0.8rem; font-weight:bold; }
 
-.cerrar {
-    position: absolute; top: 15px; right: 20px; font-size: 2rem; cursor: pointer; color: var(--text-dim);
-}
+/* Checklist */
+.tarjeta-logro { display:flex; align-items:center; gap:10px; padding:10px; background:#1a1a1a; margin-bottom:5px; border-radius:5px; cursor:pointer; }
+.tarjeta-logro.completado { background: rgba(46,204,113,0.1); border: 1px solid var(--secondary); }
+.tarjeta-logro img { width:40px; height:40px; border-radius:5px; }
 
-/* --- BARRA DE PROGRESO DE LOGROS --- */
-.progreso-contenedor {
-    background: #222; border-radius: 30px; height: 30px; width: 100%;
-    margin: 20px 0; overflow: hidden; border: 1px solid #444; position: relative;
-}
-
-.progreso-barra {
-    background: linear-gradient(90deg, #2ecc71, #27ae60);
-    height: 100%; width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
-}
-
-.progreso-texto {
-    position: absolute; width: 100%; text-align: center; line-height: 30px;
-    font-size: 0.9rem; font-weight: 800; color: white; text-shadow: 1px 1px 2px black;
-}
-
-/* --- CHECKLIST DE LOGROS --- */
-.grid-logros {
-    display: grid; gap: 12px; margin-top: 20px;
-}
-
-.tarjeta-logro {
-    background: #1a1a1a; padding: 12px; border-radius: 10px; display: flex;
-    align-items: center; gap: 15px; cursor: pointer; border: 1px solid #333;
-    transition: 0.2s;
-}
-
-.tarjeta-logro img { width: 50px; height: 50px; border-radius: 8px; }
-
-.tarjeta-logro.completado {
-    background: rgba(46, 204, 113, 0.1);
-    border-color: var(--secondary);
-}
-
-.tarjeta-logro.completado h4 { color: var(--secondary); }
-
-/* --- RASTREADOR IA --- */
-.rastreo-ia-contenedor {
-    text-align: center; padding: 30px;
-}
-
-.rastreo-ia-icono { font-size: 3.5rem; margin-bottom: 15px; animation: flotar 2s infinite; }
-
-.rastreo-ia-barra {
-    background: #222; border-radius: 10px; height: 12px; width: 100%; 
-    margin: 20px 0; overflow: hidden;
-}
-
-.rastreo-ia-llenado {
-    background: var(--primary); height: 100%; width: 0%;
-    animation: cargarInfinito 3s infinite ease-in-out;
-    box-shadow: 0 0 15px var(--primary);
-}
-
-/* --- ANIMACIONES --- */
-@keyframes flotar { 50% { transform: translateY(-15px); } }
-@keyframes cargarInfinito { 0% { width: 0%; } 50% { width: 90%; } 100% { width: 0%; } }
-
-/* --- DETALLES --- */
-.cabecera-juego { display: flex; gap: 30px; margin-bottom: 25px; }
-.img-principal { width: 300px; border-radius: 15px; }
-.info-texto h2 { color: var(--primary); font-size: 2rem; margin-bottom: 10px; }
-.info-texto p { color: var(--text-dim); font-size: 0.95rem; }
-
-hr { border: 0; border-top: 1px solid #333; margin: 25px 0; }
-
-.user-badge { color: white; font-weight: bold; background: #333; padding: 5px 12px; border-radius: 20px; font-size: 0.9rem; }
+/* IA Animación */
+.rastreo-ia-barra { background:#222; height:10px; width:100%; border-radius:5px; overflow:hidden; margin-top:10px; }
+.rastreo-ia-llenado { background:var(--primary); height:100%; width:0%; animation: load 3s infinite; }
+@keyframes load { 0% {width:0%} 50% {width:90%} 100% {width:0%} }

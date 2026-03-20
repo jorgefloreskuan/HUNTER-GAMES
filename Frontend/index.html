@@ -1,68 +1,56 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HUNTER GAMES</title>
+    <title>HUNTER GAMES | Bóveda de Logros</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <div class="header-top">
-            <h1>🎮 HUNTER GAMES</h1>
-            <div id="panel-usuario" style="display: flex; gap: 10px; align-items: center;">
-                <button id="btn-abrir-login" class="btn-auth">Entrar / Registrarse</button>
+        <nav>
+            <div class="logo">🏹 HUNTER GAMES</div>
+            <div class="busqueda-container">
+                <input type="text" id="input-busqueda" placeholder="Buscar juego o colección...">
+                <button id="btn-buscar">Cazar</button>
             </div>
-        </div>
-        <div class="buscador">
-            <input type="text" id="input-busqueda" placeholder="Busca tu próxima presa (ej. Doom, Zelda)...">
-            <button id="btn-buscar">Cazar</button>
-        </div>
+            <div id="panel-usuario">
+                <button id="btn-abrir-auth" class="btn-auth">Entrar / Registrarse</button>
+            </div>
+        </nav>
     </header>
 
-    <div id="modal-auth" class="modal oculto">
-        <div class="modal-contenido">
-            <span id="cerrar-modal" class="cerrar">&times;</span>
-            <h2 id="titulo-auth">Iniciar Sesión</h2>
-            <form id="form-auth">
-                <input type="text" id="auth-username" placeholder="Nombre de Cazador" class="oculto">
-                <input type="email" id="auth-email" placeholder="Correo Electrónico" required>
-                <input type="password" id="auth-password" placeholder="Contraseña" required>
-                <button type="submit" id="btn-submit-auth">Entrar</button>
-            </form>
-            <p id="mensaje-auth" class="mensaje-error"></p>
-            <p class="cambiar-modo"><span id="texto-modo">¿No tienes cuenta?</span> <a href="#" id="link-cambiar-modo">Regístrate aquí</a></p>
-        </div>
-    </div>
-
-    <div id="modal-ia" class="modal oculto">
-        <div class="modal-contenido modal-ia-contenido">
-            <span id="cerrar-modal-ia" class="cerrar">&times;</span>
-            <h2>🤖 La IA Recomienda:</h2>
-            <p id="mensaje-ia" class="cargando oculto">Analizando base de datos...</p>
-            <div id="contenedor-recomendaciones" class="grid-juegos"></div>
-        </div>
-    </div>
+    <main id="contenedor-juegos">
+        </main>
 
     <div id="modal-detalles" class="modal oculto">
-        <div class="modal-contenido modal-detalles-contenido">
-            <span id="cerrar-modal-detalles" class="cerrar">&times;</span>
+        <div class="contenido-modal ancho-grande">
+            <span class="cerrar" onclick="cerrarModales()">&times;</span>
             <div id="contenido-detalles"></div>
         </div>
     </div>
 
-    <div id="modal-favoritos" class="modal oculto">
-        <div class="modal-contenido modal-ia-contenido">
-            <span id="cerrar-modal-favoritos" class="cerrar">&times;</span>
-            <h2 style="color: #ffb703;">⭐ Mi Colección de Caza</h2>
-            <div id="contenedor-favoritos" class="grid-juegos">
-                </div>
+    <div id="modal-ia" class="modal oculto">
+        <div class="contenido-modal ancho-grande">
+            <span class="cerrar" onclick="cerrarModales()">&times;</span>
+            <div id="mensaje-ia"></div>
+            <div id="contenedor-recomendaciones" class="grid-juegos"></div>
         </div>
     </div>
 
-    <main id="contenedor-juegos" class="grid-juegos">
-        <p class="cargando">Cargando el catálogo de caza...</p>
-    </main>
+    <div id="modal-auth" class="modal oculto">
+        <div class="contenido-modal">
+            <span class="cerrar" onclick="cerrarModales()">&times;</span>
+            <h2 id="titulo-auth">Iniciar Sesión</h2>
+            <form id="form-auth">
+                <input type="text" id="auth-username" placeholder="Usuario" class="oculto">
+                <input type="email" id="auth-email" placeholder="Email" required>
+                <input type="password" id="auth-password" placeholder="Contraseña" required>
+                <button type="submit" class="btn-ia">Confirmar</button>
+            </form>
+            <p id="link-cambiar-modo" style="cursor:pointer; margin-top:10px; font-size:0.8rem;">¿No tienes cuenta? Regístrate</p>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>
