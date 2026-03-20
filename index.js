@@ -5,23 +5,26 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const path = require('path'); // <-- Nueva herramienta para rutas de archivos
+const path = require('path'); // Herramienta para rutas de archivos
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// --- NUEVO: ESTO CONECTA TU HTML/CSS CON EL MOTOR ---
-app.use(express.static(__dirname)); 
+// --- SERVIR ARCHIVOS ESTÁTICOS ---
+// Esto le dice a Render que tus archivos CSS y JS están en la carpeta principal
+app.use(express.static(path.join(__dirname)));
 
 // --- 1. CONEXIÓN A MONGODB ---
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('🟢 ¡Base de datos conectada con éxito!'))
     .catch(err => console.error('🔴 Error conectando a MongoDB:', err));
 
+// Esquema de Usuario
 const usuarioSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
@@ -30,6 +33,7 @@ const usuarioSchema = new mongoose.Schema({
 });
 const Usuario = mongoose.model('Usuario', usuarioSchema);
 
+// Seguridad
 const verificarToken = (req, res, next) => {
     const token = req.header('Authorization');
     if (!token) return res.status(401).json({ error: 'Acceso denegado.' });
@@ -39,11 +43,6 @@ const verificarToken = (req, res, next) => {
         next();
     } catch (error) { res.status(400).json({ error: 'Token no válido.' }); }
 };
-
-// --- RUTAS DE NAVEGACIÓN (Para que no salga el "Cannot GET") ---
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
 
 // --- RUTAS DE API ---
 app.post('/api/registro', async (req, res) => {
@@ -117,6 +116,12 @@ app.get('/api/recomendaciones/:juego', async (req, res) => {
     const promesas = nombres.map(n => axios.get(`https://api.rawg.io/api/games?key=${process.env.RAWG_API_KEY}&search=${n}&page_size=1`));
     const respuestas = await Promise.all(promesas);
     res.json(respuestas.map(r => r.data.results[0]).filter(j => j !== undefined));
+});
+
+// --- RUTA COMODÍN (HOME) ---
+// Esto resuelve el error ENOENT: busca el archivo index.html pase lo que pase
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.listen(PORT, () => { console.log(`🚀 Hunter Games en línea puerto ${PORT}`); });

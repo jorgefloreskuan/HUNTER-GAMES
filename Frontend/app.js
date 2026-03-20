@@ -1,4 +1,3 @@
-// AHORA LAS RUTAS SON RELATIVAS (Sin el localhost:3000)
 const API_URL_JUEGOS = '/api/juegos';
 const API_URL_DETALLES = '/api/juegos/detalles';
 const API_URL_AUTH = '/api';
@@ -76,7 +75,7 @@ async function abrirDetalles(id) {
     contenidoDetalles.innerHTML = '<p class="cargando">Cargando...</p>';
     const res = await fetch(`${API_URL_DETALLES}/${id}`);
     const data = await res.json();
-    let vidHtml = data.trailers[0] ? `<video controls width="100%" src="${data.trailers[0].data.max}"></video>` : '<p>Sin video.</p>';
+    let vidHtml = data.trailers[0] ? `<video controls width="100%" src="${data.trailers[0].data.max}"></video>` : '<p>Sin video registrados.</p>';
     contenidoDetalles.innerHTML = `
         <div class="cabecera-juego"><img src="${data.info.background_image}"><div><h2>${data.info.name}</h2><div>${data.info.description}</div></div></div>
         ${vidHtml}<h3>📸 Galería</h3><div class="galeria-capturas">${data.capturas.map(c => `<img src="${c.image}">`).join('')}</div>
