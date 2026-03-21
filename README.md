@@ -1,5 +1,5 @@
 # 🏹 HUNTER GAMES | Bóveda de Logros & IA
-
+<img width="1853" height="907" alt="image" src="https://github.com/user-attachments/assets/dad69bf0-d28a-45d9-b719-9055b8b42d2c" />
 **HUNTER GAMES** es una plataforma interactiva de alto rendimiento diseñada para coleccionistas de trofeos y entusiastas de los videojuegos. El sistema permite explorar una base de datos global, gestionar el progreso de logros de forma manual y obtener recomendaciones inteligentes mediante el modelo **Google Gemini**.
 
 
@@ -38,7 +38,6 @@ JWT_SECRET=tu_clave_secreta_para_tokens
 RAWG_API_KEY=tu_api_key_de_rawg
 GEMINI_API_KEY=tu_api_key_de_google_gemini
 ```
-<img width="1853" height="907" alt="image" src="https://github.com/user-attachments/assets/dad69bf0-d28a-45d9-b719-9055b8b42d2c" />
 
 
 ## 👨‍💻 Autores
