@@ -38,10 +38,6 @@ JWT_SECRET=tu_clave_secreta_para_tokens
 RAWG_API_KEY=tu_api_key_de_rawg
 GEMINI_API_KEY=tu_api_key_de_google_gemini
 
-##📦 Instalación y Uso
-Clonar el repositorio:
-git clone [https://github.com/jorgefloreskuan/HUNTER-GAMES.git]
-Instalar dependencias:
-npm install
-Lanzar en modo desarrollo:
-npm start
+
+
+
