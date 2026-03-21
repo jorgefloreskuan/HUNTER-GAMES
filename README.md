@@ -37,8 +37,18 @@ MONGO_URI=tu_cadena_de_mongodb_atlas
 JWT_SECRET=tu_clave_secreta_para_tokens
 RAWG_API_KEY=tu_api_key_de_rawg
 GEMINI_API_KEY=tu_api_key_de_google_gemini
+```
+<img width="1853" height="907" alt="image" src="https://github.com/user-attachments/assets/dad69bf0-d28a-45d9-b719-9055b8b42d2c" />
 
-<img width="1853" height="907" alt="image" src="https://github.com/user-attachments/assets/dcfcf137-f318-48e8-866d-31fbc8ba52ac" />
+
+## 👨‍💻 Autores
+**[Tu Nombre]**
+* [GitHub](https://github.com/TuUsuario)
+**[Pulido Moreno Hugo Nicolas]**
+* [GitHub](https://github.com/chacho416)
+* [LinkedIn / Portafolio](https://tu-enlace.com)
+
+
 
 
 
