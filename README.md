@@ -42,9 +42,9 @@ GEMINI_API_KEY=tu_api_key_de_google_gemini
 
 ## 👨‍💻 Autores
 **[Flores Kuan Jorge Alejandro]**
-* [GitHub](https://github.com/jorgefloreskuan)*
+ [GitHub](https://github.com/jorgefloreskuan)*
 **[Pulido Moreno Hugo Nicolas]**
-* [GitHub](https://github.com/chacho416)*
+ [GitHub](https://github.com/chacho416)*
 
 
 
