@@ -38,6 +38,7 @@ JWT_SECRET=tu_clave_secreta_para_tokens
 RAWG_API_KEY=tu_api_key_de_rawg
 GEMINI_API_KEY=tu_api_key_de_google_gemini
 
+<img width="1853" height="907" alt="image" src="https://github.com/user-attachments/assets/811ef7fb-d1e3-4710-87b3-33333fe4fced" />
 
 
 
