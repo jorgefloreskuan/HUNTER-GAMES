@@ -79,6 +79,7 @@ function crearTarjetaJuego(juego, contenedorDestino) {
     contenedorDestino.appendChild(tarjeta);
 }
 
+// FUNCIÓN DE DETALLES ACTUALIZADA (AHORA INCLUYE LA GALERÍA DE IMÁGENES)
 async function abrirDetalles(id) {
     modalDetalles.classList.remove('oculto');
     contenidoDetalles.innerHTML = '<div class="cargando">Abriendo base de datos...</div>';
@@ -90,6 +91,18 @@ async function abrirDetalles(id) {
         urlSiguientePagina = data.siguientePagina;
 
         let vidHtml = data.trailers[0] ? `<video controls width="100%" class="video-trailer" src="${data.trailers[0].data.max}"></video>` : '<p class="aviso-vacio">🎥 Sin trailers.</p>';
+
+        // Nueva sección de Galería
+        let galeriaHtml = '';
+        if (data.capturas && data.capturas.length > 0) {
+            galeriaHtml = `
+                <hr class="separador">
+                <h3>🖼️ Galería de Imágenes</h3>
+                <div class="grid-galeria">
+                    ${data.capturas.map(cap => `<img src="${cap.image}" class="img-galeria">`).join('')}
+                </div>
+            `;
+        }
 
         let logrosHtml = '';
         if (data.trofeos.length > 0) {
@@ -113,9 +126,11 @@ async function abrirDetalles(id) {
             logrosHtml = '<div class="aviso-coleccion"><h3>⚠️ Sin logros</h3><p>Prueba con la colección principal.</p></div>';
         }
 
+        // Estructura final con la galería insertada
         contenidoDetalles.innerHTML = `
             <div class="cabecera-juego"><img src="${data.info.background_image}" class="img-principal">
             <div class="info-texto"><h2>${data.info.name}</h2><div class="descripcion-scroll">${data.info.description}</div></div></div>
+            ${galeriaHtml}
             <hr class="separador"><h3>🎥 Gameplay</h3>${vidHtml}
             <hr class="separador"><h3>🏆 Checklist de Cacería</h3>${logrosHtml}`;
         
@@ -163,7 +178,7 @@ async function cargarMasLogros() {
         urlSiguientePagina = data.siguientePagina;
         
         const lista = document.getElementById('contenedor-logros-lista');
-        const fragmento = document.createDocumentFragment(); // Optimización
+        const fragmento = document.createDocumentFragment(); 
 
         data.trofeos.forEach(t => {
             const estaCompletado = listaCompletados.includes(t.id.toString());
@@ -179,7 +194,7 @@ async function cargarMasLogros() {
 
         if (!urlSiguientePagina) btn.remove(); else btn.innerText = "📥 Cargar más...";
         
-        actualizarBarra(); // Recalcula al cargar nuevos logros
+        actualizarBarra(); 
     } catch (e) {
         btn.innerText = "Error, intentar de nuevo";
     }
@@ -236,7 +251,6 @@ async function abrirFavoritos() {
     }
 }
 
-// NUEVA FUNCIÓN DE RECOMENDACIONES IA MÁS ROBUSTA
 async function pedirRecomendacionIA(n) {
     modalIA.classList.remove('oculto'); 
     mensajeIA.classList.remove('oculto'); 

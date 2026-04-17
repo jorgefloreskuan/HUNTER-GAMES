@@ -471,3 +471,25 @@ h1 {
     color: white;
     text-shadow: 1px 1px 2px black;
 }
+/* --- ESTILOS DE LA GALERÍA DE IMÁGENES --- */
+.grid-galeria {
+    display: grid;
+    /* Esto hace que se acomoden solas dependiendo del espacio */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.img-galeria {
+    width: 100%;
+    height: 120px;
+    object-fit: cover; /* Evita que las imágenes se estiren feo */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    transition: transform 0.2s ease-in-out;
+}
+
+.img-galeria:hover {
+    transform: scale(1.05); /* Pequeño efecto de zoom al pasar el mouse */
+    border: 1px solid #7c4dff;
+}
